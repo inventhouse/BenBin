@@ -26,6 +26,6 @@ if [ "$Branch" ]; then
 fi
 
 git checkout -b "$Alias"
-pushb "$Slug" "$Alias"
+setupb "$Slug" "$Alias"
 
 ###
