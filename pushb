@@ -31,14 +31,18 @@ if [ "$Upstream" ]; then
     exit 1
 fi
 
-: ${PushbPrefix:=`git config user.shortname`}
+: ${PushbPrefix:=`git config allgit.branchPrefix`}
+if [ -z "$PushbPrefix" ]; then
+    PushbPrefix=`git config user.shortname`
+    echo "Using prefix $PushbPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
+fi
 if [ -z "$PushbPrefix" ]; then
     PushbPrefix=`git config user.name | tr ' ' '_'`
-    echo "Using prefix $PushbPrefix/ change it with: git config --global user.shortname 'abc'"
+    echo "Using prefix $PushbPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
 fi
 if [ -z "$PushbPrefix" ]; then
     PushbPrefix="$USER"
-    echo "Using prefix $PushbPrefix/ change it with: git config --global user.shortname 'abc'"
+    echo "Using prefix $PushbPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
 fi
 
 git push -u origin "$Alias:$PushbPrefix/$Slug"  # FIXME: hard-coding origin
