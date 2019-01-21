@@ -2,7 +2,7 @@ BranchFlow
 ==========
 easier branch workflow
 
-`$ ag -m -- newb f my-feature [jira-url]` ==> checkout -b f ; branch -u bjh/PROJ-123-my-feature (maybe also something to add jira tik after-the-fact?)
+`$ ag -m -- newb JIRA-123-my-feature f` ==> checkout -b f ; push -u bjh/JIRA-123-my-feature (maybe also something to add jira tik after-the-fact? or generalized rename?)
 _( work with f like normal )_
 `$ ag -b f -- rebase` ==> rebase from parent branch (can I get this automagically or just assume master?)
 `$ ag -b f -- pr` ==> create PR for branch
@@ -38,7 +38,7 @@ Inara:Test bjh$
 
 - short "alias" local names, longer descriptive remote names
     - easy as possible to create - programmatic prefix (maybe git-config setting?), jira tix integration? slug?
-    - easy-or-automatic to avoid/deal with conflicts
+    - easy-or-automatic to avoid/deal with alias conflicts
     - easy to push/create PR  (probably need access token for that?)
     - easy to clean up
     - easy to alias-checkout remote branches
@@ -49,10 +49,10 @@ Inara:Test bjh$
     - should it include "pure local" branches? - probably
 
 - DONE: `newb` - create a local branch with short name & upstream with longer composed name
-    - need `pushb SLUG` for composing upstream name after-the-fact - need to guard for already tracking?
+    - DONE: need `setupb SLUG` for composing upstream name after-the-fact - need to guard for already tracking?
 - DONE: `killb` - clean up local and upstream branches
-    - need a good way to delete just local branch but with $ALLGIT_BRANCH - `dropb`?
-- `getb` - check out remote branch as alias
+    - DONE: need a good way to delete just local branch but with $ALLGIT_BRANCH - `dropb`?
+- DONE: `getb` - check out remote branch as alias
 
 - need an allgit utils module or something
 

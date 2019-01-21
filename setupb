@@ -4,9 +4,10 @@
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: pushb [SLUG [ALIAS]]   Pushes a local branch to a remote branch named
-                            prefix/SLUG
-       pushb -h|--help      Print this message and exit
+usage: setupb [SLUG [ALIAS]]   Pushes a local branch to a remote branch named
+                               prefix/SLUG; use once to set the upstream, then
+                               just push normally
+       setupb -h|--help        Print this message and exit
 USAGE
     exit 0
 fi
@@ -31,20 +32,20 @@ if [ "$Upstream" ]; then
     exit 1
 fi
 
-: ${PushbPrefix:=`git config allgit.branchPrefix`}
-if [ -z "$PushbPrefix" ]; then
-    PushbPrefix=`git config user.shortname`
-    echo "Using prefix $PushbPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
+: ${BranchPrefix:=`git config allgit.branchPrefix`}
+if [ -z "$BranchPrefix" ]; then
+    BranchPrefix=`git config user.shortname`
+    echo "Using prefix $BranchPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
 fi
-if [ -z "$PushbPrefix" ]; then
-    PushbPrefix=`git config user.name | tr ' ' '_'`
-    echo "Using prefix $PushbPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
+if [ -z "$BranchPrefix" ]; then
+    BranchPrefix=`git config user.name | tr ' ' '_'`
+    echo "Using prefix $BranchPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
 fi
-if [ -z "$PushbPrefix" ]; then
-    PushbPrefix="$USER"
-    echo "Using prefix $PushbPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
+if [ -z "$BranchPrefix" ]; then
+    BranchPrefix="$USER"
+    echo "Using prefix $BranchPrefix/ change it with: git config --global allgit.branchPrefix 'users/abc'"
 fi
 
-git push -u origin "$Alias:$PushbPrefix/$Slug"  # FIXME: hard-coding origin
+git push -u origin "$Alias:$BranchPrefix/$Slug"  # FIXME: hard-coding origin
 
 ###
