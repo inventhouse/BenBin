@@ -2,23 +2,30 @@
 
 # Copyright (c) 2019 Benjamin Holt -- MIT License
 
-if [ -z "$1" -o "$1" == "-h" -o "$1" == "--help" ]; then
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: newb ALIAS [SLUG]   Creates a new git branch named ALIAS and immediately
+usage: newb SLUG [ALIAS]   Creates a new git branch named ALIAS and immediately
                            pushes it to a remote branch named prefix/SLUG
        newb -h|--help      Print this message and exit
 USAGE
     exit 0
 fi
 
-Alias="$1"
-Slug="${2:-$1}"
+if [ -z "$1" ]; then
+    echo "Must specify a slug for the new branch name" >&2
+    exit 1
+fi
 
-# $ git config [--global] user.shortname 'bjh'
-: ${NewbPrefix:=`git config user.shortname || echo "$USER"`}
+Slug="$1"
+Alias="${2:-$Slug}"
+
+Branch=`git branch --list "$Alias"`
+if [ "$Branch" ]; then
+    echo "$Alias: branch already exists" >&2
+    exit 1
+fi
 
 git checkout -b "$Alias"
-git push -u origin "$Alias:$NewbPrefix/$Slug"  # FIXME: hard-coding origin
+pushb "$Slug" "$Alias"
 
-# clean up with $ git push origin -d bjh/thing
 ###

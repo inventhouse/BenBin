@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Copyright (c) 2019 Benjamin Holt -- MIT License
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: pushb [SLUG [ALIAS]]   Pushes a local branch to a remote branch named
+                            prefix/SLUG
+       pushb -h|--help      Print this message and exit
+USAGE
+    exit 0
+fi
+
+Alias="${2:-${ALLGIT_BRANCH:-`git rev-parse --abbrev-ref HEAD`}}"
+Slug="${1:-$Alias}"
+
+if [ -z "$Alias" ]; then
+    echo "Must specify a branch directly, using allgit, or the current branch" >&2
+    exit 1
+fi
+
+Branch=`git branch --list "$Alias"`
+if [ -z "$Branch" ]; then
+    echo "$Alias: branch not found" >&2
+    exit 1
+fi
+
+Upstream=`git rev-parse --abbrev-ref "$Alias@{upstream}" 2> /dev/null | sed -e 's:origin/::'`  # FIXME: hardcoded origin
+if [ "$Upstream" ]; then
+    echo "$Alias: already pointing to $Upstream" >&2
+    exit 1
+fi
+
+: ${PushbPrefix:=`git config user.shortname`}
+if [ -z "$PushbPrefix" ]; then
+    PushbPrefix=`git config user.name | tr ' ' '_'`
+    echo "Using prefix $PushbPrefix/ change it with: git config --global user.shortname 'abc'"
+fi
+if [ -z "$PushbPrefix" ]; then
+    PushbPrefix="$USER"
+    echo "Using prefix $PushbPrefix/ change it with: git config --global user.shortname 'abc'"
+fi
+
+git push -u origin "$Alias:$PushbPrefix/$Slug"  # FIXME: hard-coding origin
+
+###

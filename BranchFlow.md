@@ -8,7 +8,9 @@ _( work with f like normal )_
 `$ ag -b f -- pr` ==> create PR for branch
 _( incorporate feedback )_
 `$ ag -b f -- squashbranch -cp` ==> squash, re-commit with original message + squash-hashes, force-push (maybe be clever about only squash if there are multiple commits to squash)
-`$ ag -b f -- done` ==> check out parent branch and delete local and remote (or rebase-done?)
+`$ ag -b f -- killb` ==> check out parent branch and delete local and remote (or rebase-done?)
+
+`$ ag -a -- listb` ==> list alias branches in repos that have them
 
 - DONE: $ALLGIT_BRANCH - mechanism for helpers that expect to be on the desired branch so they can enforce that?
 
@@ -42,8 +44,16 @@ Inara:Test bjh$
     - easy to alias-checkout remote branches
 
 - easy to list "alias" branches
+    - DONE: `listb` - lists branches that don't match their upstream (including local branches)
     - allgit -a/--alias-branches? - run in repos with local branches that don't "match" upstream - needs to be a "pre-filter" in allgit though
     - should it include "pure local" branches? - probably
 
+- DONE: `newb` - create a local branch with short name & upstream with longer composed name
+    - need `pushb SLUG` for composing upstream name after-the-fact - need to guard for already tracking?
+- DONE: `killb` - clean up local and upstream branches
+    - need a good way to delete just local branch but with $ALLGIT_BRANCH - `dropb`?
+- `getb` - check out remote branch as alias
+
 - need an allgit utils module or something
+
 ---
