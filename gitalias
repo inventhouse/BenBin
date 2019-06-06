@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Copyright (c) 2019 Benjamin Holt -- MIT License
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: gitalias              Prints existing git aliases
+       gitalias -s|--script  Prints git aliases as a script for reproducing
+                             them in a new environment
+       gitalias -h|--help    Print this message and exit
+
+Create a new alias with:
+  git config --global alias.THING 'COMMAND'
+
+Remove an alias with:
+  git config --global --unset alias.THING
+
+USAGE
+    exit 0
+fi
+
+if [ "$1" == "-s" -o "$1" == "--script" ]; then
+    # Print as a script
+    echo "#/bin/sh"
+    git config --list | grep alias | sed -e $'s/\([^=]*\)=\(.*\)/git config --global \\1 \'\\2\'/'
+    exit 0
+fi
+
+# Else, print in a nice format
+git config --list | grep alias | sed -e $'s/alias\.\([^=]*\)=\(.*\)/\\1 = \'\\2\'/'
+
+###
