@@ -21,7 +21,7 @@ fi
 
 if [ "$1" == "-s" -o "$1" == "--script" ]; then
     # Print as a script
-    echo "#/bin/sh"
+    echo "#!/bin/sh"
     git config --list | grep alias | sed -e $'s/\([^=]*\)=\(.*\)/git config --global \\1 \'\\2\'/'
     exit 0
 fi
