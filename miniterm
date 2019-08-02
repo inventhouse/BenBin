@@ -1,0 +1,32 @@
+#!/bin/bash
+# Copyright (c) 2019 Benjamin Holt -- MIT License
+
+: ${MTPortPattern:='/dev/cu.usbmodem[0-9]+'}
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: miniterm [PORT] [BAUD]  Starts pySerial's miniterm, defaults to the
+                               first port matching MTPortPattern 115200 baud
+       miniterm -l|--list      Lists ports
+       miniterm -h|--help      Print this message and exit
+
+Environment Variables:
+    MTPortPattern=$MTPortPattern
+
+Requires pySerial: pip install pyserial
+
+USAGE
+    exit 0
+fi
+
+if [ "$1" == "-l" -o "$1" == "--list" ]; then
+    # List ports
+    python -m serial.tools.list_ports -v
+    exit 0
+fi
+
+Dev=${1:-`python -m serial.tools.list_ports | grep -E "$MTPortPattern" | head -1`}
+Baud=${2:-"115200"}
+python -m serial.tools.miniterm "$Dev" "$Baud"
+
+###
