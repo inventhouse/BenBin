@@ -7,6 +7,7 @@ State machine engine that makes minimal, but convenient, assumptions.
 This is a stripped-down [Mealy](https://en.wikipedia.org/wiki/Mealy_machine) state machine engine (output depends on state and input.)  Good for writing parsers, but makes no assumptions about text parsing, and doesn't make any unnecessary assumptions about the states, tests, or actions that make up the transitions that wire up the machines it can run.
 """
 
+from collections import namedtuple
 import re
 #####
 
@@ -19,18 +20,23 @@ def main(args, env):
 
 
 ###  State Machine  ###
+TransitionInfo = namedtuple("TransitionInfo", ("state", "dst", "count", "result"),)
+TraceInfo = namedtuple("TraceInfo", ("t_info", "test", "action", "tag", "out"))
+
+
 class StateMachine(object):
-    def __init__(self, start, unrecognized=lambda s,i: None, tracer=None):
+    def __init__(self, start, unrecognized=lambda *_: None, tracer=lambda *_: None):
         """Creates a state machine in the start state with an optional unrecognized input handler and debug tracer
 
-        If an input does not match any transition the `unrecognized` handler is called with the state and input; by default this just returns `None`.
+        If an input does not match any transition the `unrecognized` handler is called with the input, state and input count; by default this just returns `None`.
 
-        An optional `tracer` gets called after each transition's test with `(state, i, test, result, action, dst, tag)`; this can be set to `printTrace` for a verbose log of the operation of your state machine.
+        An optional `tracer` gets called after each transition tested with the input and a `TraceInfo`.  This can be set to a `Tracer` instance for a verbose log of the operation of your state machine.
         """
         self.transitions = {start:[], None:[],}  # {state: [(test, action, dst, tag), ...], ...}
         self.state = start
         self.unrecognized = unrecognized
         self.tracer = tracer
+        self.i_count = 0
 
 
     def add(self, state, test, action, dst, tag=None):
@@ -49,34 +55,30 @@ class StateMachine(object):
         self.transitions[state].append((test, action, dst, tag))  # BJH: auto-tag "global" transitions?
 
 
-    # BJH: is an 'action' decorator useful?
-    # def action(self, state, test, dst, tag=None):
-    #     def decor(f):
-    #         self.add(state, test, f, dst, tag)
-    #         return f  # HACK: don't actually decorate f, just attach to the state machine
-    #     return decor
-
-
     def input(self, i):
         """Tests input `i` against current state's transitions, changes state, and returns the output of the first matching transition's action.
 
         Transitions are tested in the order they were added to their originating state and the first one with a truish result is followed.  Transitions starting from `None` are implicitly added to all states and evaluated in order after the current state's explict transitions.
 
-        If `test` is callable, it will be called with the input and an `info` tuple containing `(state, dst)`; a truish result will cause this transition's action to be called and the machine will go to `dst`.  If `test` is not callable will be compared against the input (`test == input`).
+        If `test` is callable, it will be called with the input and a `TransitionInfo`; a truish result will cause this transition's action to be called and the machine will go to `dst`.  If `test` is not callable will be compared against the input (`test == input`).
 
-        If the test result is truish and `action` is callable, it will be called with the input and an `info` tuple containing `(state, result, dst)` and the output will be returned.  Otherwise, the `action` itself will be returned when the transition is followed.
+        If the test result is truish and `action` is callable, it will be called with the input and a `TransitionInfo` and the output will be returned.  Otherwise, the `action` itself will be returned when the transition is followed.
         """
+        self.i_count += 1
         tlist = self.transitions[self.state]
         for (test, action, dst, tag) in tlist + self.transitions[None]:
-            result = test(i, (self.state, dst)) if callable(test) else test == i
-            if self.tracer:
-                self.tracer(self.state, i, test, result, action, dst, tag)
+            t_info = TransitionInfo(self.state, dst, self.i_count, None)
+            result = test(i, t_info) if callable(test) else test == i
+            t_info = t_info._replace(result=result)
             if result:
-                out = action(i, (self.state, result, dst)) if callable(action) else action
+                out = action(i, t_info) if callable(action) else action
+                self.tracer(i, TraceInfo(t_info, test, action, tag, out))
                 if dst is not None:
                     self.state = dst
                 return out
-        return self.unrecognized(self.state, i)
+            self.tracer(i, TraceInfo(t_info, test, action, tag, None))
+
+        return self.unrecognized(i, self.state, self.i_count)
 
 
     def parse(self, inputs):
@@ -118,12 +120,29 @@ def inputAction(i, _):
 
 
 ###  Utilities  ###
-def printTrace(state, i, test, result, action, dst, tag):
-    label = f"{tag}:" if tag else ''
-    if result:
-        print(f"T:{state}->{dst}: {label}(input:{i}, test:{test}, result:{result}, {action})")
-    else:
-        print(f"T:\t{label}({state}, input:{i}, test:{test}, result:{result}, {dst})")
+class Tracer():
+    def __init__(self, printer=print, prefix="> "):
+        self.input_count = 0
+        self.printer = print
+        self.prefix = prefix
+
+
+    def __call__(self, i, t):
+        (t_info, test, action, tag, out) = t
+        if t_info.count != self.input_count:
+            # New input, start a new block, number and print it
+            self.input_count = t_info.count
+            self.printer(f"{self.prefix}\n{self.prefix}=====  {t_info.state}  =====\n{self.prefix}{t_info.count}: {i}")
+
+        # Format and print tested transition
+        t_string = f"{self.prefix}\t{t_info.result}\t({t_info.state}, {test}, {action}, {t_info.dst})"
+        if tag:
+            t_string += f" [{tag}]"
+        self.printer(t_string)
+
+        if t_info.result:
+            # Transition fired, print state change and output
+            self.printer(f"{self.prefix}\t{t_info.state} --> {t_info.dst}\n{self.prefix}\t\t{out}")
 #####
 
 

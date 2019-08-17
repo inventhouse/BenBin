@@ -14,7 +14,7 @@ import statemachine as sm
 def main(args, env, inFile):
     name = args[1] if len(args) >= 2 else "bholt"
     parser = sm.StateMachine("top")
-    # parser = sm.StateMachine("top", tracer=sm.printTrace)
+    # parser = sm.StateMachine("top", tracer=sm.Tracer())
     startYesterday = ("1. What did you do yesterday?", "_Yesterday:_", "yesterdaySection")
     startToday = ("2. What do you commit to today?", "_Today:_", "todaySection")
     parser.add(None, *startYesterday)
