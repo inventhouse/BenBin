@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 # Copyright (c) 2019 Benjamin Holt -- MIT License
 
-"""
-State machine engine that makes minimal, but convenient, assumptions.
+"""General-purpose state machine engine with utilities and tracing."""
 
-This is a stripped-down [Mealy](https://en.wikipedia.org/wiki/Mealy_machine) state machine engine (output depends on state and input.)  Good for writing parsers, but makes no assumptions about text parsing, and doesn't make any unnecessary assumptions about the states, tests, or actions that make up the transitions that wire up the machines it can run.
-"""
 
 from collections import deque, namedtuple
 import re
@@ -14,7 +11,7 @@ import re
 
 ###  Main  ###
 def main(args, env):
-    "BJH: TODO: do something useful"
+    "TODO: do something useful"
     pass
 #####
 
@@ -25,12 +22,16 @@ TraceInfo = namedtuple("TraceInfo", ("t_info", "test", "action", "tag", "out"))
 
 
 class StateMachine(object):
+    """State machine engine that makes minimal, but convenient, assumptions.
+
+    This is a stripped-down [Mealy](https://en.wikipedia.org/wiki/Mealy_machine) (output depends on state and input) state machine engine.  Good for writing parsers, but makes no assumptions about text parsing, and doesn't make any unnecessary assumptions about the states, tests, or actions that make up the transitions that wire up the machines it can run.
+    """
     def __init__(self, start, tracer=True, unrecognized=True):
-        """Creates a state machine in the start state with an optional unrecognized input handler and debug tracer
+        """Creates a state machine in the start state with an optional tracer and unrecognized input handler.
 
-        If an input does not match any transition the `unrecognized` handler is called with the input, state and input count; by default this just returns `None`.
+        An optional `tracer` gets called after each transition tested with the input and a `TraceInfo`.  By default, this uses `RecentTracer` to collect the last five significant transitions (self-transitions are counted but only the last of them is kept) to be raised by the default `unrecognized` handler.  An integer can be passed to set the trace depth.  This can be set to another callable, such as a `Tracer` instance, for a complete, quite verbose, log of the operation of your state machine; the recent trace will still be collected if the default unrecognized handler is being used.
 
-        An optional `tracer` gets called after each transition tested with the input and a `TraceInfo`.  This can be set to a `Tracer` instance for a verbose log of the operation of your state machine.
+        If an input does not match any transition the `unrecognized` handler is called with the input, state and input count.  By default this raises a `ValueError` with a short trace of recent transitions.  It can be set to `False` to disable the default tracing and ignore unrecognized input.
         """
         self.transitions = {start:[], None:[],}  # {state: [(test, action, dst, tag), ...], ...}
         self.state = start
@@ -68,7 +69,7 @@ class StateMachine(object):
             self.transitions[state] = []
         if dst not in self.transitions:
             self.transitions[dst] = []
-        self.transitions[state].append((test, action, dst, tag))  # BJH: auto-tag "global" transitions?
+        self.transitions[state].append((test, action, dst, tag))  # REM: auto-tag "global" transitions?
 
 
     def input(self, i):
@@ -137,6 +138,7 @@ def inputAction(i, _):
 
 ###  Utilities  ###
 def format_transition_table(sm):
+    """TODO: impliment this"""
     pass
 #####
 

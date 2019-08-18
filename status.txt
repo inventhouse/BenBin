@@ -12,7 +12,7 @@ debugged other things
 debugged issue with tests
 2. What do you commit to today?
 @bholt
-Work with @abc with her front-end work, and continue trying to fix my development environment
+Work with @abc on her front-end work, and continue trying to fix my development environment
 @abc
 Ideally finish the things, but it will probably carry over to Monday
 @def
