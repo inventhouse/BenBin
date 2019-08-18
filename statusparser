@@ -14,14 +14,16 @@ import statemachine as sm
 def main(args, env, inFile):
     name = args[1] if len(args) >= 2 else "bholt"
     parser = sm.StateMachine("top")
-    # parser = sm.StateMachine("top", tracer=sm.Tracer())
+    # parser = sm.StateMachine("top", tracer=sm.Tracer(printer=lambda s: print(f"T: {s}")))
+    # rt = sm.RecentTracer()
+    # parser = sm.StateMachine("top", tracer=rt, unrecognized=rt.throw)
     startYesterday = ("1. What did you do yesterday?", "_Yesterday:_", "yesterdaySection")
     startToday = ("2. What do you commit to today?", "_Today:_", "todaySection")
     parser.add(None, *startYesterday)
     parser.add(None, *startToday)
 
     parser.add("yesterdaySection", f"@{name}", None, "yesterday")
-    endStatus = (sm.matchTest(r"^@\w+$"), None, "top")
+    endStatus = (sm.matchTest(r"^@\w+$"), None, "top", "User Match")
     parser.add("yesterday", *endStatus)
     parser.add("yesterday", *startToday)
     statusLine = (sm.trueTest, lambda i,_: f"> {i}", None)

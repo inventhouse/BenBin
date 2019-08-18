@@ -7,7 +7,7 @@ State machine engine that makes minimal, but convenient, assumptions.
 This is a stripped-down [Mealy](https://en.wikipedia.org/wiki/Mealy_machine) state machine engine (output depends on state and input.)  Good for writing parsers, but makes no assumptions about text parsing, and doesn't make any unnecessary assumptions about the states, tests, or actions that make up the transitions that wire up the machines it can run.
 """
 
-from collections import namedtuple
+from collections import deque, namedtuple
 import re
 #####
 
@@ -25,7 +25,7 @@ TraceInfo = namedtuple("TraceInfo", ("t_info", "test", "action", "tag", "out"))
 
 
 class StateMachine(object):
-    def __init__(self, start, unrecognized=lambda *_: None, tracer=lambda *_: None):
+    def __init__(self, start, tracer=lambda *_: None, unrecognized=lambda *_: None):
         """Creates a state machine in the start state with an optional unrecognized input handler and debug tracer
 
         If an input does not match any transition the `unrecognized` handler is called with the input, state and input count; by default this just returns `None`.
@@ -120,11 +120,16 @@ def inputAction(i, _):
 
 
 ###  Utilities  ###
+def format_transition_table(sm):
+    pass
+#####
+
+
+###  Tracing  ###
 class Tracer():
-    def __init__(self, printer=print, prefix="> "):
+    def __init__(self, printer=print):
         self.input_count = 0
-        self.printer = print
-        self.prefix = prefix
+        self.printer = printer
 
 
     def __call__(self, i, t):
@@ -132,17 +137,65 @@ class Tracer():
         if t_info.count != self.input_count:
             # New input, start a new block, number and print it
             self.input_count = t_info.count
-            self.printer(f"{self.prefix}\n{self.prefix}=====  {t_info.state}  =====\n{self.prefix}{t_info.count}: {i}")
+            self.printer("")
+            self.printer(f"=====  {t_info.state}  =====")
+            self.printer(f"{t_info.count}: {i}")
 
         # Format and print tested transition
-        t_string = f"{self.prefix}\t{t_info.result}\t({t_info.state}, {test}, {action}, {t_info.dst})"
-        if tag:
-            t_string += f" [{tag}]"
+        t_string = f"\t[{tag}] " if tag else "\t"
+        t_string += f"{t_info.result} <-- ({t_info.state}, {test}, {action}, {t_info.dst})"
         self.printer(t_string)
 
         if t_info.result:
             # Transition fired, print state change and output
-            self.printer(f"{self.prefix}\t{t_info.state} --> {t_info.dst}\n{self.prefix}\t\t{out}")
+            self.printer(f"\t    {t_info.state} --> {t_info.dst}")
+            self.printer(f"\t    ==> '{out}'")
+
+
+class RecentTracer(object):
+    def __init__(self, sm=None, depth=10):
+        self.sm = sm  # The state machine (for printing the transition table if desired)
+        self.buffer = deque(maxlen=depth)  # [(t_info, (loop_count, t_count, i_count)), ...]
+        self.t_count = 0  # Count of tested transitions since the last one that was followed
+
+
+    def __call__(self, i, t):
+        (t_info, *_) = t
+        self.t_count += 1
+        if not t_info.result:
+            return
+
+        loop_count = 1
+        if len(self.buffer):
+            (_, ((s, *_), *_), (lc, *_)) = self.buffer[-1]
+            if t_info.state == s and (t_info.dst is None or t_info.state == t_info.dst):
+                # if the state isn't changing, bump the loop count and replace the last entry
+                loop_count = lc + 1
+                self.buffer.pop()
+
+        self.buffer.append((i, t, (loop_count, self.t_count)))
+        self.t_count = 0
+
+
+    def throw(self, i, s, c):
+        traceLines = "\n".join(self.formatTrace())
+        msg = f"Unrecognized input\nStateMachine Traceback (most recent transition last):\n{traceLines}\nValueError: '{s}' did not recognize {c}: '{i}'"
+        raise ValueError(msg)
+
+
+    def formatTrace(self):
+        trace = []
+        for (ti, (t_info, test, action, tag, out), (lc, tc)) in self.buffer:
+            if lc > 1:
+                trace.append(f"  ...(Looped {lc} times)")
+            trace.append(f"  {t_info.count}: {ti}")
+            t_string = f"      ({tc} tested) "
+            if tag:
+                t_string += f"[{tag}] "
+            t_string += f"{t_info.result} <-- ({t_info.state}, {test}, {action}, {t_info.dst})"
+            trace.append(t_string)
+            trace.append(f"          {t_info.state} --> {t_info.dst}\n          ==> '{out}'")
+        return trace
 #####
 
 
