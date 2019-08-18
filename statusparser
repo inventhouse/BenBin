@@ -13,10 +13,10 @@ import statemachine as sm
 ###  Main  ###
 def main(args, env, inFile):
     name = args[1] if len(args) >= 2 else "bholt"
-    parser = sm.StateMachine("top")
+    parser = sm.StateMachine("top", unrecognized=False)
+    # parser = sm.StateMachine("top")
     # parser = sm.StateMachine("top", tracer=sm.Tracer(printer=lambda s: print(f"T: {s}")))
-    # rt = sm.RecentTracer()
-    # parser = sm.StateMachine("top", tracer=rt, unrecognized=rt.throw)
+    # parser = sm.StateMachine("top", tracer=2)
     startYesterday = ("1. What did you do yesterday?", "_Yesterday:_", "yesterdaySection")
     startToday = ("2. What do you commit to today?", "_Today:_", "todaySection")
     parser.add(None, *startYesterday)

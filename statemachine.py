@@ -25,7 +25,7 @@ TraceInfo = namedtuple("TraceInfo", ("t_info", "test", "action", "tag", "out"))
 
 
 class StateMachine(object):
-    def __init__(self, start, tracer=lambda *_: None, unrecognized=lambda *_: None):
+    def __init__(self, start, tracer=True, unrecognized=True):
         """Creates a state machine in the start state with an optional unrecognized input handler and debug tracer
 
         If an input does not match any transition the `unrecognized` handler is called with the input, state and input count; by default this just returns `None`.
@@ -34,9 +34,25 @@ class StateMachine(object):
         """
         self.transitions = {start:[], None:[],}  # {state: [(test, action, dst, tag), ...], ...}
         self.state = start
-        self.unrecognized = unrecognized
-        self.tracer = tracer
         self.i_count = 0
+
+        # Baseline to no-ops, default behavior will override
+        self.tracer = tracer if callable(tracer) else lambda *_: None
+        self.unrecognized = unrecognized if callable(unrecognized) else lambda *_: None
+        if unrecognized is True:
+            # Use default tracer and unrecognized handler
+            traceDepth = 5  # Each transition prints 4-5 lines of trace
+            if type(tracer) == int:  # Tricksy, but really easy to set the depth
+                traceDepth = tracer
+            rt = RecentTracer(sm=self, depth=traceDepth)
+            self.unrecognized = rt.throw
+            self.tracer = rt
+            if callable(tracer):
+                # If another tracer was specified, use both of them
+                def both(i, t):
+                    tracer(i, t)
+                    rt(i, t)
+                self.tracer = both
 
 
     def add(self, state, test, action, dst, tag=None):
