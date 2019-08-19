@@ -5,7 +5,7 @@ some more
 lines to see
 multiline status
 @abc
-Kept working on frontend things; this will be a long status line, lots of words.  How many words you might ask, well let's ask our good friend `wc`... huh, 30 words!
+Kept working on frontend things; this will be a long status line, lots of words.  How many words you might ask, well, let's ask our good friend `wc`... huh, 30 words!
 @def
 debugged things
 debugged other things

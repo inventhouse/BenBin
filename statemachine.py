@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2019 Benjamin Holt -- MIT License
 
-"""General-purpose state machine engine with utilities and tracing."""
+"""General-purpose state machine engine with extras and tracing."""
 
 
 from collections import deque, namedtuple
@@ -45,7 +45,7 @@ class StateMachine(object):
             traceDepth = 5  # Each transition prints 4-5 lines of trace
             if type(tracer) == int:  # Tricksy, but really easy to set the depth
                 traceDepth = tracer
-            rt = RecentTracer(sm=self, depth=traceDepth)
+            rt = RecentTracer(depth=traceDepth)
             self.unrecognized = rt.throw
             self.tracer = rt
             if callable(tracer):
@@ -131,7 +131,7 @@ def matchTest(pattern):
 
 ###  Actions  ###
 def inputAction(i, _):
-    """Returns the input that matched this transition"""
+    """Returns the input that matched the transition"""
     return i
 #####
 
@@ -145,12 +145,17 @@ def format_transition_table(sm):
 
 ###  Tracing  ###
 class Tracer():
+    """Collects a trace of state machine transitions (or not) by input."""
     def __init__(self, printer=print):
+        """Creates a Tracer instance with a `printer` callback for lines of trace output.
+
+        The instance is callable and can be used directly as the `tracer` callback of a `StateMachine`.  The `printer` is expected to add newlines or otherwise separate each line output; a prefix can be added to each line like this: `printer=lambda s: print(f"T: {s}")`"""
         self.input_count = 0
         self.printer = printer
 
 
     def __call__(self, i, t):
+        """Processes a tracer callback from a `StateMachine` instance, pushing each line of output to the `printer` callback."""
         (t_info, test, action, tag, out) = t
         if t_info.count != self.input_count:
             # New input, start a new block, number and print it
@@ -171,13 +176,19 @@ class Tracer():
 
 
 class RecentTracer(object):
-    def __init__(self, sm=None, depth=10):
-        self.sm = sm  # The state machine (for printing the transition table if desired)
+    """Keeps a limited trace of significant state machine transitions to provide a recent "traceback" particularly for understanding unrecognized input.
+
+    Only "successful" transitions are recorded, and if a transition stays in the same state, those are counted but only the last is retained."""
+    def __init__(self, depth=10):
+        """Creates a RecentTracer instance with trace depth.
+
+        The instance is callable and can be used directly as the `tracer` callback of a `StateMachine`, likewise the `throw` method can be used as the `unrecognized` callback (and both are used default)."""
         self.buffer = deque(maxlen=depth)  # [(t_info, (loop_count, t_count, i_count)), ...]
         self.t_count = 0  # Count of tested transitions since the last one that was followed
 
 
     def __call__(self, i, t):
+        """Processes a tracer callback from a `StateMachine` instance."""
         (t_info, *_) = t
         self.t_count += 1
         if not t_info.result:
@@ -185,7 +196,7 @@ class RecentTracer(object):
 
         loop_count = 1
         if len(self.buffer):
-            (_, ((s, *_), *_), (lc, *_)) = self.buffer[-1]
+            (_, ((s, *_), *_), (lc, *_)) = self.buffer[-1]  # FIXME: this kind of unpacking is out of control
             if t_info.state == s and (t_info.dst is None or t_info.state == t_info.dst):
                 # if the state isn't changing, bump the loop count and replace the last entry
                 loop_count = lc + 1
@@ -196,14 +207,16 @@ class RecentTracer(object):
 
 
     def throw(self, i, s, c):
+        """Raises a `ValueError` for an unrecognized input to a `StateMachine` with a trace of that machine's recent significant transitions."""
         traceLines = "\n".join(self.formatTrace())
         msg = f"Unrecognized input\nStateMachine Traceback (most recent transition last):\n{traceLines}\nValueError: '{s}' did not recognize {c}: '{i}'"
         raise ValueError(msg)
 
 
     def formatTrace(self):
+        """Formats the recent significant transitions into a list of lines for output."""
         trace = []
-        for (ti, (t_info, test, action, tag, out), (lc, tc)) in self.buffer:
+        for (ti, (t_info, test, action, tag, out), (lc, tc)) in self.buffer:  # FIXME: this kind of unpacking is out of control
             if lc > 1:
                 trace.append(f"  ...(Looped {lc} times)")
             trace.append(f"  {t_info.count}: {ti}")
