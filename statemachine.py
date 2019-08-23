@@ -9,16 +9,9 @@ import re
 #####
 
 
-###  Main  ###
-def main(args, env):
-    "TODO: do something useful"
-    pass
-#####
-
-
 ###  State Machine  ###
 TransitionInfo = namedtuple("TransitionInfo", ("state", "dst", "count", "result"),)
-TraceInfo = namedtuple("TraceInfo", ("t_info", "test", "action", "tag", "out"))
+TraceInfo = namedtuple("TraceInfo", ("t_info", "test", "action", "tag", "out", "end"))
 
 
 class StateMachine(object):
@@ -56,10 +49,10 @@ class StateMachine(object):
                 self.tracer = both
 
 
-    def add(self, state, test, action, dst, tag=None):
+    def add(self, state, test, dst, action=None, tag=None):
         """Add transition from `state` to `dst` with `test`, `action`, and optional debugging `tag`.  Transitions will be tested in the order they added.
 
-        `state` and `dst` must be hashable and are automatically added.  If `state` is `None`, this transition will be implictly added to all states, and evaluated after any explict transitions.  If `dst` is `None`, the machine will remain in the same state (self-transition).
+        `state` and `dst` must be hashable and are automatically added.  If `state` is `None`, this transition will be implictly added to all states, and evaluated after any explict transitions.  If `dst` is `None`, the machine will remain in the same state (self-transition or the action could directly set a dynamic state).
 
         If `test` is callable, it will be called as described below, otherwise it will be compared against the input (`test == input`)
 
@@ -69,7 +62,7 @@ class StateMachine(object):
             self.transitions[state] = []
         if dst not in self.transitions:
             self.transitions[dst] = []
-        self.transitions[state].append((test, action, dst, tag))  # REM: auto-tag "global" transitions?
+        self.transitions[state].append((test, dst, action, tag))  # REM: auto-tag "global" transitions?
 
 
     def input(self, i):
@@ -77,23 +70,25 @@ class StateMachine(object):
 
         Transitions are tested in the order they were added to their originating state and the first one with a truish result is followed.  Transitions starting from `None` are implicitly added to all states and evaluated in order after the current state's explict transitions.
 
-        If `test` is callable, it will be called with the input and a `TransitionInfo`; a truish result will cause this transition's action to be called and the machine will go to `dst`.  If `test` is not callable will be compared against the input (`test == input`).
+        If `test` is callable, it will be called with the input and a `TransitionInfo`; a truish result will cause the machine will go to `dst` and this transition's action to be called.  If `test` is not callable will be compared against the input (`test == input`).
 
         If the test result is truish and `action` is callable, it will be called with the input and a `TransitionInfo` and the output will be returned.  Otherwise, the `action` itself will be returned when the transition is followed.
         """
         self.i_count += 1
-        tlist = self.transitions[self.state]
-        for (test, action, dst, tag) in tlist + self.transitions[None]:
+        tlist = self.transitions.get(self.state, [])
+        for (test, dst, action, tag) in tlist + self.transitions[None]:
             t_info = TransitionInfo(self.state, dst, self.i_count, None)
             result = test(i, t_info) if callable(test) else test == i
             t_info = t_info._replace(result=result)
             if result:
-                out = action(i, t_info) if callable(action) else action
-                self.tracer(i, TraceInfo(t_info, test, action, tag, out))
                 if dst is not None:
                     self.state = dst
+                # Run the action after the state change so it could override the end state (e.g. pop state from a stack)
+                out = action(i, t_info) if callable(action) else action
+                # Be sure to trace the actual end state after `action` is done
+                self.tracer(i, TraceInfo(t_info, test, action, tag, out, self.state))
                 return out
-            self.tracer(i, TraceInfo(t_info, test, action, tag, None))
+            self.tracer(i, TraceInfo(t_info, test, action, tag, None, self.state))
 
         return self.unrecognized(i, self.state, self.i_count)
 
@@ -115,17 +110,28 @@ def trueTest(i, _):
 
 def inTest(l):
     "Creates a test closure that returns true if an input is in `l`"
-    def t(i, _):
+    def c(i, _):
         return i in l
-    return t
+    return c
+
+
+def anyTest(l):
+    "Creates a test closure that returns the first truish result of the tests in `l`"
+    def c(i, t):
+        for test in l:
+            r = test(i, t)
+            if r:
+                return r
+        return False
+    return c
 
 
 def matchTest(pattern):
     "Creates a test closure that returns true if an input matches `pattern` using `re.match`"
     r = re.compile(pattern)
-    def t(i, _):
+    def c(i, _):
         return r.match(i)
-    return t
+    return c
 #####
 
 
@@ -156,7 +162,7 @@ class Tracer():
 
     def __call__(self, i, t):
         """Processes a tracer callback from a `StateMachine` instance, pushing each line of output to the `printer` callback."""
-        (t_info, test, action, tag, out) = t
+        (t_info, test, action, tag, out, end) = t
         if t_info.count != self.input_count:
             # New input, start a new block, number and print it
             self.input_count = t_info.count
@@ -171,7 +177,7 @@ class Tracer():
 
         if t_info.result:
             # Transition fired, print state change and output
-            self.printer(f"\t    {t_info.state} --> {t_info.dst}")
+            self.printer(f"\t    {t_info.state} --> {end}")
             self.printer(f"\t    ==> '{out}'")
 
 
@@ -197,7 +203,7 @@ class RecentTracer(object):
         loop_count = 1
         if len(self.buffer):
             (_, ((s, *_), *_), (lc, *_)) = self.buffer[-1]  # FIXME: this kind of unpacking is out of control
-            if t_info.state == s and (t_info.dst is None or t_info.state == t_info.dst):
+            if t_info.state == s and (t_info.state == t.end):
                 # if the state isn't changing, bump the loop count and replace the last entry
                 loop_count = lc + 1
                 self.buffer.pop()
@@ -216,7 +222,7 @@ class RecentTracer(object):
     def formatTrace(self):
         """Formats the recent significant transitions into a list of lines for output."""
         trace = []
-        for (ti, (t_info, test, action, tag, out), (lc, tc)) in self.buffer:  # FIXME: this kind of unpacking is out of control
+        for (ti, (t_info, test, action, tag, out, end), (lc, tc)) in self.buffer:  # FIXME: this kind of unpacking is out of control
             if lc > 1:
                 trace.append(f"  ...(Looped {lc} times)")
             trace.append(f"  {t_info.count}: {ti}")
@@ -225,15 +231,67 @@ class RecentTracer(object):
                 t_string += f"[{tag}] "
             t_string += f"{t_info.result} <-- ({t_info.state}, {test}, {action}, {t_info.dst})"
             trace.append(t_string)
-            trace.append(f"          {t_info.state} --> {t_info.dst}\n          ==> '{out}'")
+            trace.append(f"          {t_info.state} --> {end}\n          ==> '{out}'")
         return trace
 #####
 
 
-#####
+###  Main  ###
 if __name__ == "__main__":
-    # import os, sys
-    # _xit = main(sys.argv, os.environ)  # pylint: disable=invalid-name
-    # sys.exit(_xit)
-    pass
+    import random
+
+    def adlib(x):
+        "Dynamically assemble messages from nested collections of parts.  Tuples are pieces to be strung together, lists are variants to choose among; anything else is used as a string"
+        if type(x) is tuple:
+            return "".join([ adlib(i) for i in x ])  # Joining with "|" can be helpful to see how messages get put together
+        if type(x) is list:
+            return adlib(random.choice(x))
+        return str(x)
+
+    (above, below) = ("above", "below")
+    messages = {
+        above: ("You are on the deck of a small sailboat on a ", ["calm", "serene", "blue", "clear", "glistening",], " sea; a hatch leads below."),
+        below: ("You are in the ", ["cozy", "homey", "snug",], " cabin of a small boat, just enough room for a bunk and a tiny desk with a logbook; a hatch leads up."),
+        "sail": ("You ", ["set", "adjust", "tack",], " your sail ", ["to", "toward", "for"], " {}."),
+        "sleep": ("The bunk is ", ["soft", "comfortable", "warm", "cozy",], " and you ", ["rest", "sleep", "snooze", "nap", "doze",], " ", ["well", "deeply", "blissfully", "nicely"], "."),
+        "log": [("Weather was ", ["fair", "good", "lovely",], "."),
+            (["Good", "Quick", "Slow",], " sailing ", ["today", ("this ", ["morning", "afternoon", "evening",])], "."),
+        ],
+    }
+
+    def lookAction(i, t):
+        s = t.dst if t.dst is not None else t.state
+        return adlib(messages[s])
+
+    def sailAction(i, t):
+        s = input("Where to? > ")
+        return adlib(messages["sail"]).format(s)
+
+    log_entries = [(["Fair", "Nice", "Brisk",], " weather."),]  # Put one bogus entry in 'cos choose can't take an empty array
+    def writeAction(*_):
+        s = input("What do you want to say? > ")
+        log_entries.append(s)
+        return "Written"
+
+    world = StateMachine("start")
+    # world = StateMachine("start", tracer=20)  # Keep a much deeper trace
+    world.add("start", trueTest, above, lookAction, tag="Start")
+    world.add(above, inTest(["d", "down", "below",]), below, lookAction, tag="Go below")
+    world.add(above, inTest(["s", "sail",]), None, sailAction, tag="Sail")
+
+    world.add(below, inTest(["u", "up", "above",]), above, lookAction, tag="Go above")
+    world.add(below, inTest(["r", "read", "read logbook",]), None, lambda *_: adlib([messages["log"], log_entries]), tag="Read")
+    world.add(below, inTest(["w", "write", "log",]), None, writeAction, tag="Write")
+    world.add(below, inTest(["s", "sleep", "bunk", "lie down", "lay down", "nap",]), None, lambda *_: adlib(messages["sleep"]), tag="Sleep")
+
+    world.add(None, inTest(["l", "look",]), None, lookAction, tag="Look")
+    world.add(None, lambda i,_: i != "crash", None, "Sorry, you can't do that.", tag="Not crash")  # You can type "crash" to dump the state machine's trace
+
+    print("Smooth Sailing")
+    print("Press enter to start.")
+    while True:
+        out = world.input(input("> "))
+        if out:
+            print(out)
+
 #####
