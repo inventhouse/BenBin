@@ -13,14 +13,15 @@ import statemachine as sm
 ###  Main  ###
 def main(args, env, inFile):
     name = args[1] if len(args) >= 2 else "bholt"
-    parser = sm.StateMachine("top", unrecognized=False)
-    # parser = sm.StateMachine("top")
+    parser = sm.StateMachine("top")
+    # parser = sm.StateMachine("top", unrecognized=False)
     # parser = sm.StateMachine("top", tracer=sm.Tracer(printer=lambda s: print(f"T: {s}")))
     # parser = sm.StateMachine("top", tracer=2)
     startYesterday = ("1. What did you do yesterday?", "yesterdaySection", "_Yesterday:_")
     startToday = ("2. What do you commit to today?", "todaySection", "_Today:_")
-    parser.add(None, *startYesterday)
-    parser.add(None, *startToday)
+    parser.add("top", *startYesterday)
+    parser.add("top", *startToday)
+    parser.add("top", sm.trueTest, None, tag="Other line")  # Comment this out and the parser will crash unless it's using `unrecognized=False` above
 
     parser.add("yesterdaySection", f"@{name}", "yesterday")
     endStatus = (sm.matchTest(r"^@\w+$"), "top")
