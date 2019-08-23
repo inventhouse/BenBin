@@ -275,6 +275,7 @@ if __name__ == "__main__":
 
     world = StateMachine("start")
     # world = StateMachine("start", tracer=20)  # Keep a much deeper trace
+    # world = StateMachine("start", tracer=Tracer(printer=lambda s: print(f"T: {s}")))  # Complete tracer with prefix
     world.add("start", trueTest, above, lookAction, tag="Start")
     world.add(above, inTest(["d", "down", "below",]), below, lookAction, tag="Go below")
     world.add(above, inTest(["s", "sail",]), None, sailAction, tag="Sail")
