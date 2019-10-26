@@ -1,0 +1,17 @@
+# Uncomment this for troubleshooting:
+# $XONSH_SHOW_TRACEBACK = True
+
+# XONSH WIZARD START
+source-bash "echo loading xonsh foreign shell"
+xontrib load coreutils powerline prompt_ret_code ssh_agent xo z
+# XONSH WIZARD END
+
+###  Prompt  ###
+$DYNAMIC_CWD_WIDTH = "30%"
+$DYNAMIC_CWD_ELISION_CHAR = "…"
+$PROMPT = "{BOLD_BLUE}>>>{NO_COLOR} "
+$RIGHT_PROMPT = '{ret_code_color}●{NO_COLOR}{env_name} {branch_color}{curr_branch: {}} {BLUE}{cwd}{NO_COLOR}'
+
+###  Aliases  ###
+source ~/inventhub/BenBin/xonsh_aliases.xsh
+###
