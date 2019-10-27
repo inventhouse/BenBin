@@ -7,5 +7,6 @@ def _it(args, stdin=None):
         return $it
 
 aliases["it"] = _it
+aliases["ag"] = "allgit"
 
 ###

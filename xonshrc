@@ -1,15 +1,24 @@
 # Uncomment this for troubleshooting:
 # $XONSH_SHOW_TRACEBACK = True
 
+###  Setup  ###
+# `ln -s ~/inventhub/BenBin/xonshrc ~/.xonshrc`
+# In Terminal prefs:
+# - General > Shells open with: Command /usr/local/bin/xonsh
+# - Profiles > Ask before closing: Only if there are processes other than: xonsh
+# In Terminal › Integrated › Shell: Osx > Edit settings in json, add:
+#    "terminal.integrated.shell.osx": "/usr/local/bin/xonsh",
+#    "terminal.integrated.automationShell.osx": "/bin/sh",
+
 # XONSH WIZARD START
 source-bash "echo loading xonsh foreign shell"
-xontrib load coreutils powerline prompt_ret_code ssh_agent xo z
+xontrib load coreutils prompt_ret_code
 # XONSH WIZARD END
 
 ###  Prompt  ###
 $DYNAMIC_CWD_WIDTH = "30%"
 $DYNAMIC_CWD_ELISION_CHAR = "…"
-$PROMPT = "{BOLD_BLUE}>>>{NO_COLOR} "
+$PROMPT = "{BOLD_BLUE}⫸{NO_COLOR} "
 $RIGHT_PROMPT = '{ret_code_color}●{NO_COLOR}{env_name} {branch_color}{curr_branch: {}} {BLUE}{cwd}{NO_COLOR}'
 
 ###  Aliases  ###
