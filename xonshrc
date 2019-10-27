@@ -23,7 +23,8 @@ $PATH.extend(["~/inventhub/allgit", "~/inventhub/BenBin"])
 $DYNAMIC_CWD_WIDTH = "30%"
 $DYNAMIC_CWD_ELISION_CHAR = "…"
 $PROMPT = "{BOLD_BLUE}⫸{NO_COLOR} "
-$RIGHT_PROMPT = '{ret_code_color}●{NO_COLOR}{env_name} {branch_color}{curr_branch: {}} {BLUE}{cwd}{NO_COLOR}'
+$MULTILINE_PROMPT = "{BOLD_BLUE}…{NO_COLOR}"
+$RIGHT_PROMPT = '{ret_code_color}●{NO_COLOR}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{NO_COLOR}'
 
 ###  Aliases  ###
 source ~/inventhub/BenBin/xonsh_aliases.xsh
