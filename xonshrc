@@ -5,7 +5,7 @@
 # `ln -s ~/inventhub/BenBin/xonshrc ~/.xonshrc`
 # In Terminal prefs:
 # - General > Shells open with: Command /usr/local/bin/xonsh
-# - Profiles > Ask before closing: Only if there are processes other than: xonsh
+# - Profiles > Shell > Ask before closing: Only if there are processes other than: xonsh
 # In Terminal › Integrated › Shell: Osx > Edit settings in json, add:
 #    "terminal.integrated.shell.osx": "/usr/local/bin/xonsh",
 #    "terminal.integrated.automationShell.osx": "/bin/sh",
@@ -14,6 +14,10 @@
 source-bash "echo loading xonsh foreign shell"
 xontrib load coreutils prompt_ret_code
 # XONSH WIZARD END
+
+###  Path  ###
+$PATH[0:0] = ["~/anaconda3/bin",]
+$PATH.extend(["~/inventhub/allgit", "~/inventhub/BenBin"])
 
 ###  Prompt  ###
 $DYNAMIC_CWD_WIDTH = "30%"
