@@ -16,15 +16,15 @@ xontrib load coreutils prompt_ret_code
 # XONSH WIZARD END
 
 ###  Path  ###
-$PATH[0:0] = ["~/anaconda3/bin",]
+$PATH[0:0] = ["~/anaconda3/bin", "/usr/local/bin",]
 $PATH.extend(["~/inventhub/allgit", "~/inventhub/BenBin"])
 
 ###  Prompt  ###
-$DYNAMIC_CWD_WIDTH = "30%"
-$DYNAMIC_CWD_ELISION_CHAR = "…"
 $PROMPT = "{BOLD_BLUE}⫸{NO_COLOR} "
 $MULTILINE_PROMPT = "{BOLD_BLUE}…{NO_COLOR}"
 $RIGHT_PROMPT = '{ret_code_color}●{NO_COLOR}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{NO_COLOR}'
+$DYNAMIC_CWD_WIDTH = "30%"
+$DYNAMIC_CWD_ELISION_CHAR = "…"
 
 ###  Aliases  ###
 source ~/inventhub/BenBin/xonsh_aliases.xsh
