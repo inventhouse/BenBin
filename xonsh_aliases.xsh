@@ -4,7 +4,7 @@ def _it(args, stdin=None):
         return "{}".format(${...}.get("it", ""))
     else:  # Stash input into $it
         $it = stdin.read()
-        return $it
+        return $it if "-q" not in args else ""
 aliases["it"] = _it
 
 # alias pbq='pbpaste | sed -e "s/^/> /" | pbcopy'
