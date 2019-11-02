@@ -16,7 +16,7 @@ def _pbq(args, stdin=None):
 aliases["pbq"] = _pbq
 
 # alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'
-#aliases["pbc"] = 'pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'  # REM: can't seem to do pipelines in aliases?
+# aliases["pbc"] = lambda: $[pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy]  # pipelines in aliases are tricky
 def _pbc(args, stdin=None):
     "Strips #-style comments from the lines in the pasteboard so they can be pasted"
     lines = !(pbpaste)
