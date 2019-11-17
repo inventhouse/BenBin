@@ -17,7 +17,10 @@ To Do
 - create issue & pr to make `ret_code_color` configurable
     - [code](https://github.com/xonsh/xonsh/blob/master/xontrib/prompt_ret_code.xsh)
 - create issue for "python redirection": `<(py_exp)`, `>(py_name)`, `>>(py_name)`
-
+- source into namespace?  `source as`?
+- doc xontrib module - better help for python
+    - offline copy of module docs
+    - optionally use terminal browser like lynx
 
 ### Doneyard
 
