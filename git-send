@@ -38,6 +38,10 @@ echo "Committing..."
 git commit -m "$Message"
 
 sleep 0.1
+echo "Pulling..."
+git pull -r --autostash
+
+sleep 0.1
 echo "Pushing..."
 git push
 
