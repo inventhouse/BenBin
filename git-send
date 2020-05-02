@@ -1,0 +1,47 @@
+#!/bin/bash
+# Copyright (c) 2020 Benjamin Holt -- MIT License
+
+set -e  # Stop-on-error
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: git send MESSAGE     Commit & push with message; if no files are
+                            staged, modified files will be added
+       git send             Show status and prompt for message before
+                            sending as above
+       git send -h|--help   Print this message and exit
+
+USAGE
+    exit 0
+fi
+
+Message="$*"
+if [ -z "$Message" ]; then
+    git status -s
+    sleep 0.1  # HACK: prompt sometimes comes out out-of-order
+    echo "Enter a message (^C or no message to cancel)"
+    sleep 0.1
+    read -p "> " Message
+    if [ -z "$Message" ]; then
+        echo "Canceled"
+        exit 1
+    fi
+fi
+
+if git diff-index --cached --quiet --ignore-submodules HEAD --; then
+    echo "Adding changed files..."
+    git add -u  # No staged changes, add unstaged files
+fi
+
+sleep 0.1
+echo "Committing..."
+git commit -m "$Message"
+
+sleep 0.1
+echo "Pushing..."
+git push
+
+sleep 0.1
+echo "Done."
+
+###
