@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: retoc            Regenerate any TOCs in .md files in the current
+                        directory (recursively)
+       retoc -h|--help  Print this message and exit
+USAGE
+    exit 0
+fi
+
+if ! which doctoc >> /dev/null ; then
+    echo "Error: requires doctoc, npm install -g doctoc" >&2
+    exit 1
+fi
+
+grep --recursive --files-with-matches --include '*.md' "START doctoc generated TOC" . | xargs doctoc
+
+###
