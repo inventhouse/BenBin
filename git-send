@@ -5,9 +5,11 @@ set -e  # Stop-on-error
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: git send MESSAGE     Commit & push with message; if no files are
-                            staged, modified files will be added
-       git send             Show status and prompt for message before
+usage: git send [-a|--add] MESSAGE
+                            Commit & push with message; if no files are
+                            staged, modified files will be added; -a|--add
+                            adds modified files regardless
+       git send [-a|--add]  Show status and prompt for message before
                             sending as above
        git send -h|--help   Print this message and exit
 
@@ -15,25 +17,39 @@ USAGE
     exit 0
 fi
 
+AddFlag=""
+if [ "$1" == "-a" -o "$1" == "--add" ]; then
+    AddFlag="$1"
+    shift
+fi
+
 Message="$*"
 if [ -z "$Message" ]; then
     git status -s
     sleep 0.1  # HACK: prompt sometimes comes out out-of-order
-    if git diff-index --cached --quiet --ignore-submodules HEAD --; then
+    if git diff-index --cached --quiet --ignore-submodules HEAD -- || [ -n "$AddFlag" ]; then
         echo "Sending changed files"
     else
-        echo "Only sending staged changes"
+        echo "Only sending staged changes (-a MESSAGE to add changed files)"
     fi
     echo "Enter a message (^C or no message to cancel)"
     sleep 0.1
     read -p "> " Message
+
+    # Handle late -a
+    StartsWith=`echo "$Message" | sed -e 's/^ *//' | cut -d ' ' -f 1`
+    if [ "$StartsWith" == "-a" -o "$StartsWith" == "--add" ]; then
+        AddFlag="$StartsWith"
+        Message=`echo "$Message" | sed -e 's/^ *//' -e "s/^$StartsWith//" -e 's/^ *//' -e 's/ *$//'`
+    fi
+
     if [ -z "$Message" ]; then
         echo "Canceled"
         exit 1
     fi
 fi
 
-if git diff-index --cached --quiet --ignore-submodules HEAD --; then
+if git diff-index --cached --quiet --ignore-submodules HEAD -- || [ -n "$AddFlag" ]; then
     echo "Adding changed files..."
     git add -u  # No staged changes, add unstaged files
 fi
