@@ -47,7 +47,7 @@ if [ -z "$Message" ]; then
     if [ -n "$AddFlag" ] || git diff-index --cached --quiet --ignore-submodules HEAD --; then
         echo "${Bold}Will add changed files${Off}"
     else
-        echo "${Bold}Only sending staged changes${Off} (-a MESSAGE to add changed files)"
+        echo "${Bold}Only sending staged changes${Off} (-a MESSAGE to add changed files too)"
     fi
     echo "${Bold}Enter a message${Off} (^C or no message to cancel)"
     sleep 0.1
