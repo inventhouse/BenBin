@@ -14,6 +14,8 @@ usage: git send [-a|--all] -m|--message MESSAGE
                             at the prompt
        git send -h|--help   Print this message and exit
 
+Note: git send is designed to virually always be used without flags or arguments (and so the option parsing is hacky)
+
 USAGE
     exit 0
 fi
