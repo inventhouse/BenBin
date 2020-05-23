@@ -7,10 +7,10 @@ if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
 usage: git send [-a|--all] -m|--message MESSAGE
                             Commit & push with message; if no files are
-                            staged, modified files will be added; -a|--add
+                            staged, modified files will be added; -a|--all
                             adds modified files regardless
        git send [-a|--all]  Show git status and prompt for message before
-                            sending as above; -a|--add can instead be added
+                            sending as above; -a|--all can instead be added
                             at the prompt
        git send -h|--help   Print this message and exit
 
