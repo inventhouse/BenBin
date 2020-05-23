@@ -19,6 +19,11 @@ Message="$*"
 if [ -z "$Message" ]; then
     git status -s
     sleep 0.1  # HACK: prompt sometimes comes out out-of-order
+    if git diff-index --cached --quiet --ignore-submodules HEAD --; then
+        echo "Sending changed files"
+    else
+        echo "Only sending staged changes"
+    fi
     echo "Enter a message (^C or no message to cancel)"
     sleep 0.1
     read -p "> " Message
