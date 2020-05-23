@@ -17,6 +17,9 @@ USAGE
     exit 0
 fi
 
+Bold=`tput bold`
+Off=`tput sgr0`
+
 AddFlag=""
 if [ "$1" == "-a" -o "$1" == "--add" ]; then
     AddFlag="$1"
@@ -28,13 +31,13 @@ if [ -z "$Message" ]; then
     git status -s
     sleep 0.1  # HACK: prompt sometimes comes out out-of-order
     if git diff-index --cached --quiet --ignore-submodules HEAD -- || [ -n "$AddFlag" ]; then
-        echo "Sending changed files"
+        echo "${Bold}Sending changed files${Off}"
     else
-        echo "Only sending staged changes (-a MESSAGE to add changed files)"
+        echo "${Bold}Only sending staged changes${Off} (-a MESSAGE to add changed files)"
     fi
-    echo "Enter a message (^C or no message to cancel)"
+    echo "${Bold}Enter a message${Off} (^C or no message to cancel)"
     sleep 0.1
-    read -p "> " Message
+    read -p "${Bold}>${Off} " Message
 
     # Handle late -a
     StartsWith=`echo "$Message" | sed -e 's/^ *//' | cut -d ' ' -f 1`
@@ -44,29 +47,29 @@ if [ -z "$Message" ]; then
     fi
 
     if [ -z "$Message" ]; then
-        echo "Canceled"
+        echo "${Bold}Canceled${Off}"
         exit 1
     fi
 fi
 
 if git diff-index --cached --quiet --ignore-submodules HEAD -- || [ -n "$AddFlag" ]; then
-    echo "Adding changed files..."
+    echo "${Bold}Adding changed files...${Off}"
     git add -u  # No staged changes, add unstaged files
 fi
 
 sleep 0.1
-echo "Committing..."
+echo "${Bold}Committing...${Off}"
 git commit -m "$Message"
 
 sleep 0.1
-echo "Pulling..."
+echo "${Bold}Pulling...${Off}"
 git pull -r --autostash
 
 sleep 0.1
-echo "Pushing..."
+echo "${Bold}Pushing...${Off}"
 git push
 
 sleep 0.1
-echo "Done."
+echo "${Bold}Done.${Off}"
 
 ###
