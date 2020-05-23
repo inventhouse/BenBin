@@ -31,7 +31,7 @@ if [ -z "$Message" ]; then
     git status -s
     sleep 0.1  # HACK: prompt sometimes comes out out-of-order
     if git diff-index --cached --quiet --ignore-submodules HEAD -- || [ -n "$AddFlag" ]; then
-        echo "${Bold}Sending changed files${Off}"
+        echo "${Bold}Will add changed files${Off}"
     else
         echo "${Bold}Only sending staged changes${Off} (-a MESSAGE to add changed files)"
     fi
