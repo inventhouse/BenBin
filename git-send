@@ -30,7 +30,7 @@ Message="$*"
 if [ -z "$Message" ]; then
     git status -s
     sleep 0.1  # HACK: prompt sometimes comes out out-of-order
-    if git diff-index --cached --quiet --ignore-submodules HEAD -- || [ -n "$AddFlag" ]; then
+    if [ -n "$AddFlag" ] || git diff-index --cached --quiet --ignore-submodules HEAD --; then
         echo "${Bold}Will add changed files${Off}"
     else
         echo "${Bold}Only sending staged changes${Off} (-a MESSAGE to add changed files)"
@@ -39,7 +39,7 @@ if [ -z "$Message" ]; then
     sleep 0.1
     read -p "${Bold}>${Off} " Message
     Message=`echo "$Message" | sed -e 's/^ *//' -e 's/ *$//'`
-    # Handle late -a
+    # Handle ex-post-facto -a
     StartsWith=`echo "$Message" | cut -d ' ' -f 1`
     if [ "$StartsWith" == "-a" -o "$StartsWith" == "--add" ]; then
         AddFlag="$StartsWith"
@@ -52,7 +52,7 @@ if [ -z "$Message" ]; then
     fi
 fi
 
-if git diff-index --cached --quiet --ignore-submodules HEAD -- || [ -n "$AddFlag" ]; then
+if [ -n "$AddFlag" ] || git diff-index --cached --quiet --ignore-submodules HEAD --; then
     echo "${Bold}Adding changed files...${Off}"
     git add -u  # No staged changes, add unstaged files
 fi
