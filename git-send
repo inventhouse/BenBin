@@ -5,11 +5,11 @@ set -e  # Stop-on-error
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: git send [-a|--add] MESSAGE
+usage: git send [-a|--all] MESSAGE
                             Commit & push with message; if no files are
                             staged, modified files will be added; -a|--add
                             adds modified files regardless
-       git send [-a|--add]  Show status and prompt for message before
+       git send [-a|--all]  Show status and prompt for message before
                             sending as above
        git send -h|--help   Print this message and exit
 
@@ -21,7 +21,7 @@ Bold=`tput bold`
 Off=`tput sgr0`
 
 AddFlag=""
-if [ "$1" == "-a" -o "$1" == "--add" ]; then
+if [ "$1" == "-a" -o "$1" == "--all" ]; then
     AddFlag="$1"
     shift
 fi
@@ -41,7 +41,7 @@ if [ -z "$Message" ]; then
     Message=`echo "$Message" | sed -e 's/^ *//' -e 's/ *$//'`
     # Handle ex-post-facto -a
     StartsWith=`echo "$Message" | cut -d ' ' -f 1`
-    if [ "$StartsWith" == "-a" -o "$StartsWith" == "--add" ]; then
+    if [ "$StartsWith" == "-a" -o "$StartsWith" == "--all" ]; then
         AddFlag="$StartsWith"
         Message=`echo "$Message" | sed -e "s/^$StartsWith *//"`
     fi
