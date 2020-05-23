@@ -38,12 +38,12 @@ if [ -z "$Message" ]; then
     echo "${Bold}Enter a message${Off} (^C or no message to cancel)"
     sleep 0.1
     read -p "${Bold}>${Off} " Message
-
+    Message=`echo "$Message" | sed -e 's/^ *//' -e 's/ *$//'`
     # Handle late -a
-    StartsWith=`echo "$Message" | sed -e 's/^ *//' | cut -d ' ' -f 1`
+    StartsWith=`echo "$Message" | cut -d ' ' -f 1`
     if [ "$StartsWith" == "-a" -o "$StartsWith" == "--add" ]; then
         AddFlag="$StartsWith"
-        Message=`echo "$Message" | sed -e 's/^ *//' -e "s/^$StartsWith//" -e 's/^ *//' -e 's/ *$//'`
+        Message=`echo "$Message" | sed -e "s/^$StartsWith *//"`
     fi
 
     if [ -z "$Message" ]; then
