@@ -5,12 +5,13 @@ set -e  # Stop-on-error
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: git send [-a|--all] MESSAGE
+usage: git send [-a|--all] -m|--message MESSAGE
                             Commit & push with message; if no files are
                             staged, modified files will be added; -a|--add
                             adds modified files regardless
-       git send [-a|--all]  Show status and prompt for message before
-                            sending as above
+       git send [-a|--all]  Show git status and prompt for message before
+                            sending as above; -a|--add can instead be added
+                            at the prompt
        git send -h|--help   Print this message and exit
 
 USAGE
@@ -26,7 +27,17 @@ if [ "$1" == "-a" -o "$1" == "--all" ]; then
     shift
 fi
 
-Message="$*"
+if [ -n "$1" ] && ! [ "$1" == "-m" -o "$1" == "--message" ]; then
+    echo "Unknown option $1, run 'git send -h|--help' for usage"
+    exit 1
+fi
+
+Message=""
+if [ "$1" == "-m" -o "$1" == "--message" ]; then
+    shift
+    Message="$*"
+fi
+
 if [ -z "$Message" ]; then
     git status -s
     sleep 0.1  # HACK: prompt sometimes comes out out-of-order
