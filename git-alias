@@ -11,11 +11,7 @@ usage: git alias              Prints existing git aliases
                               them in a new environment
        git alias -h|--help    Print this message and exit
 
-Create a new alias with:
-  git config --global alias.THING 'COMMAND'
-
-Remove an alias with:
-  git config --global --unset alias.THING
+Note: this always sets and unsets aliases in the global scope
 
 USAGE
     exit 0
