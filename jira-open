@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Copyright (c) 2020 Benjamin Holt -- MIT License
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: jira-open TEXT       If TEXT appears to be a ticket number, open
+                            that ticket directly; otherwise search Jira for
+                            that snippet.
+       jira-open -h|--help  Print this message and exit.
+
+USAGE
+    exit 0
+fi
+
+# Bold=`tput bold`
+# Off=`tput sgr0`
+
+Selection=`echo "$*" | sed -e 's/^[ 	]*//' -e 's/[ 	]*$//'`
+
+: ${JiraBaseUrl:="https://openedx.atlassian.net"}
+: ${JiraDefaultProj:="REV"}
+
+urlencode() {
+    # From https://gist.github.com/cdown/1163649
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf "$c" ;;
+            #' ') printf "+" ;;
+            *) printf "$c" | xxd -p -c1 | while read x;do printf "%%%s" "$x";done
+        esac
+    done
+}
+
+# Normalize as if it's a ticket number
+Ticket=`echo "$Selection" | sed -e "s/^\\([0-9][0-9]*\\)/$JiraDefaultProj-\\1/" -e 's/^[^A-Za-z0-9]*\([A-Za-z][A-Za-z]*\)[^A-Za-z0-9]*\([0-9][0-9]*\)[^A-Za-z0-9]*$/\1-\2/g' | tr 'a-z' 'A-Z'`
+
+if echo "$Ticket" | egrep '^[A-Z]+-[0-9]+$' > /dev/null; then
+    # If it looks like a ticket, go there
+    Url="$JiraBaseUrl/browse/$Ticket"
+else
+    # Otherwise, do a search
+    Search=`urlencode "$Selection"`
+    Url="$JiraBaseUrl/issues/?jql=text%20~%20%22$Search%22"
+fi
+
+if [ -n "$Url" ]; then
+    # echo "$Url"
+    open "$Url"
+fi
