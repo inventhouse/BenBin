@@ -26,9 +26,12 @@ def _pbc(args, stdin=None):
     return None
 aliases["pbc"] = _pbc
 
-
 aliases["adb"] = "~/Library/Android/sdk/platform-tools/adb"
+
 aliases["ag"] = "allgit"
+if !(which allgit_dev):  # Special symlink to keep uing the dev version
+    aliases["ag"] = "allgit_dev"
+
 aliases["dkr"] = "docker"
 aliases["dkc"] = "docker-compose"
 
