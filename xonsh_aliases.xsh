@@ -36,7 +36,7 @@ aliases["dkr"] = "docker"
 aliases["dkc"] = "docker-compose"
 
 # Snippets:
-aliases["snip-clog"] = lambda: $[echo 'console.log({ "": {}, })  // BJH: DELETEME    ' | pbcopy]
+aliases["snip-clog"] = lambda: $[echo 'console.log({ "": {}, })  // BJH: NOCOMMIT    ' | pbcopy]
 
 aliases["snip-eslint"] = lambda: $[echo '// eslint-disable-next-line ' | pbcopy]
 
