@@ -16,16 +16,16 @@ xontrib load coreutils prompt_ret_code vox
 # XONSH WIZARD END
 
 ###  Path  ###
-$PATH[0:0] = ["~/anaconda3/bin", "/usr/local/bin",]
+$PATH[0:0] = ["/usr/local/opt/python3/bin/", "/usr/local/bin",]
 $PATH.extend(["~/inventhub/allgit", "~/inventhub/bettergit", "~/inventhub/BenBin"])
 
 ###  Imports  ###
 import re
 
 ###  Prompt  ###
-$PROMPT = "{ret_code_color}⫸{NO_COLOR} "
-$MULTILINE_PROMPT = "{BOLD_BLUE}…{NO_COLOR}"
-$RIGHT_PROMPT = '{ret_code_color}●{NO_COLOR}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{NO_COLOR}'
+$PROMPT = "{ret_code_color}⫸{RESET} "
+$MULTILINE_PROMPT = "{BOLD_BLUE}…{RESET}"
+$RIGHT_PROMPT = '{ret_code_color}●{RESET}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{RESET}'
 $DYNAMIC_CWD_WIDTH = "30%"
 $DYNAMIC_CWD_ELISION_CHAR = "…"
 
