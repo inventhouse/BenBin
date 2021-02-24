@@ -23,6 +23,8 @@ $PATH.extend(["~/inventhub/allgit", "~/inventhub/bettergit", "~/inventhub/BenBin
 import re
 
 ###  Prompt  ###
+# Left-prompt is constant char+space to maximize space and eliminate start-of-line noise; all info goes in the right-prompt
+# Right-prompt starts with constant char; this will allow relatively easy parsing of copied terminal lines
 $PROMPT = "{ret_code_color}⫸{RESET} "
 $MULTILINE_PROMPT = "{BOLD_BLUE}…{RESET}"
 $RIGHT_PROMPT = '{ret_code_color}●{RESET}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{RESET}'
