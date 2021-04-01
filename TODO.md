@@ -11,5 +11,9 @@ To Do
     - `git rev-parse --abbrev-ref HEAD | grep -Ev "^(main|master)$"`
     - e.g. `ag -t offmain - listb`: tell me what branches repos are on if they're not on main
     - Should this get packaged with `allgit` itself?
+    - Should it allow a branch pattern argument?  Something like `offbranch "release-1.*"`
+    - Or should it have an invert option `onbranch -v "release-1.*"`?
+    - Should such options get passed on to grep?
+    - Maybe the whole thing should be `headcheck [options for grep]`?
 
 ---
