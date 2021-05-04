@@ -17,7 +17,7 @@ xontrib load coreutils prompt_ret_code vox
 
 ###  Path  ###
 $PATH[0:0] = ["/usr/local/opt/python3/bin/", "/usr/local/bin",]
-$PATH.extend(["~/inventhub/allgit", "~/inventhub/bettergit", "~/inventhub/BenBin"])
+$PATH.extend(["~/inventhub/allgit", "~/inventhub/bettergit", "~/inventhub/BenBin", "~/bin",])
 
 ###  Imports  ###
 import re
