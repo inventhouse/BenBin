@@ -2,13 +2,17 @@
 # $XONSH_SHOW_TRACEBACK = True
 
 ###  Setup  ###
-# `ln -s ~/inventhub/BenBin/xonshrc ~/.xonshrc`
+# `ln -s ~/inventhub/BenBin/xonshrc[_variant] ~/.xonshrc`
+# (xonshrc variants should source this file as approprate)
 # In Terminal prefs:
 # - General > Shells open with: Command /usr/local/bin/xonsh
 # - Profiles > Shell > Ask before closing: Only if there are processes other than: xonsh
 # In VS Code prefs: Terminal › Integrated › Shell: Osx > Edit settings in json, add:
 #    "terminal.integrated.shell.osx": "/usr/local/bin/xonsh",
 #    "terminal.integrated.automationShell.osx": "/bin/sh",
+
+# Comment this out to see instructions for not skipping redundant aliases
+$FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = True
 
 # XONSH WIZARD START
 source-bash "echo loading xonsh foreign shell"

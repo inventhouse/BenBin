@@ -1,0 +1,24 @@
+# Uncomment this for troubleshooting:
+# $XONSH_SHOW_TRACEBACK = True
+
+###  Base  ###
+# See setup instructions in base xonshrc
+source ~/inventhub/BenBin/xonshrc
+
+###  Path  ###
+# $PATH[0:0] = ["/usr/local/opt/python3/bin/", "/usr/local/bin",]
+# $PATH.extend(["~/inventhub/allgit", "~/inventhub/bettergit", "~/inventhub/BenBin", "~/bin",])
+
+###  Imports  ###
+# import re
+
+###  Prompt  ###
+$PROMPT = "{ret_code_color}⮞{NO_COLOR} "  # HACK: RPi doesn't have triple-nested-greater-than :'(
+if [ int(n) for n in $XONSH_VERSION.split(".") ] < [0, 9, 23]:
+    # HACK: remove this once RPi is on v0.9.23+
+    $MULTILINE_PROMPT = "{BOLD_BLUE}…{NO_COLOR}"
+    $RIGHT_PROMPT = '{ret_code_color}●{NO_COLOR}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{NO_COLOR}'
+
+###  Aliases  ###
+
+###
