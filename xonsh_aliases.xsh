@@ -26,6 +26,22 @@ def _pbc(args, stdin=None):
     return None
 aliases["pbc"] = _pbc
 
+# alias pbl='pbpaste | tr 'A-Z' 'a-z' | pbcopy'
+def _pbl(args, stdin=None):
+    "Lowercase text on the pasteboard"
+    lines = [ s.lower() for s in !(pbpaste) ]
+    echo -n @("".join(lines)) | pbcopy
+    return None
+aliases["pbl"] = _pbl
+
+# alias pbu='pbpaste | tr 'a-z' 'A-Z' | pbcopy'
+def _pbu(args, stdin=None):
+    "Uppercase text on the pasteboard"
+    lines = [ s.upper() for s in !(pbpaste) ]
+    echo -n @("".join(lines)) | pbcopy
+    return None
+aliases["pbu"] = _pbu
+
 aliases["adb"] = "~/Library/Android/sdk/platform-tools/adb"
 
 aliases["ag"] = "allgit"

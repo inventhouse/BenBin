@@ -16,4 +16,6 @@ To Do
     - Should such options get passed on to grep?
     - Maybe the whole thing should be `headcheck [options for grep]`?
 
+- recase: convert strings between upper, lower, camel, snake, kabob, ...
+
 ---
