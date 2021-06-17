@@ -8,6 +8,7 @@ def urlify(**kwargs):
     "URL-encode keyword arguments as a query string"
     return urls.urlencode(kwargs)
 
+
 def url2d(url):
     "Breaks down a URL into a dictionary, including decoding query string"
     pr = urls.urlparse(url)
@@ -19,5 +20,14 @@ def url2d(url):
     pd["query"] = qd
     
     return pd
+
+
+def d2url(d):
+    "Breaks down a URL into a dictionary, including decoding query string"
+    if type(d.get("query")) is dict:
+        d = d.copy()
+        d["query"] = urls.urlencode(d["query"])
+    parts = urls.ParseResult(**d)
+    return urls.unparse(parts)
 
 #####
