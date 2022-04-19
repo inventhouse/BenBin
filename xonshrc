@@ -20,8 +20,18 @@ xontrib load coreutils prompt_ret_code vox
 # XONSH WIZARD END
 
 ###  Path  ###
-$PATH[0:0] = ["/usr/local/opt/python3/bin/", "/usr/local/bin",]
-$PATH.extend(["~/inventhub/allgit", "~/inventhub/bettergit", "~/inventhub/BenBin", "~/bin",])
+$PATH[0:0] = [
+    "/opt/homebrew/bin",
+    "/opt/homebrew/sbin",
+    "/usr/local/opt/python3/bin/",
+    "/usr/local/bin",
+    ]
+$PATH.extend([
+    "~/inventhub/allgit",
+    "~/inventhub/bettergit",
+    "~/inventhub/BenBin",
+    "~/bin",
+    ])
 
 ###  Imports  ###
 import re
