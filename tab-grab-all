@@ -11,6 +11,8 @@ USAGE
     exit 0
 fi
 
+# Hacked from [Capture all tabs in Safari as URLs to the clipboard – theconsultant.net](https://theconsultant.net/2017/06/capture-all-tabs-in-safari-as-urls-to-the-clipboard/)
+
 osascript <<SCRIPT
 tell application "Safari"
     set tabList to ""
