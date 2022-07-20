@@ -26,7 +26,7 @@ tell application "Safari"
             end if
             set tabName to name of tab y of window x
             set tabURL to URL of tab y of window x as string
-            set tabList to tabList & "– [" & tabName & "](" & tabURL & ")" & linefeed as string
+            set tabList to tabList & "- [" & tabName & "](" & tabURL & ")" & linefeed as string
         end repeat
         set tabList to tabList & linefeed
     end repeat
