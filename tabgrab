@@ -7,9 +7,16 @@ usage: tabgrab              Collect tabs from all Safari windows as a markdown
                             list with the first tab of each window as the
                             parent of the remaining tabs
 
+       tabgrab -c|--copy    Copies the list to the pasteboard
+
        tabgrab -h|--help    Print this message and exit
 USAGE
     exit 0
+fi
+
+CopyList="false"
+if [ "$1" == "-c" -o "$1" == "--copy" ]; then
+    CopyList="true"
 fi
 
 # Hacked from [Capture all tabs in Safari as URLs to the clipboard – theconsultant.net](https://theconsultant.net/2017/06/capture-all-tabs-in-safari-as-urls-to-the-clipboard/)
@@ -30,7 +37,10 @@ tell application "Safari"
         end repeat
         set tabList to tabList & linefeed
     end repeat
-    -- set the clipboard to the tabList
-    return tabList as text
+    if $CopyList then
+        set the clipboard to the tabList
+    else
+        return tabList as text
+    end if
 end tell
 SCRIPT
