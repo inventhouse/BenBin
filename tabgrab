@@ -39,6 +39,7 @@ tell application "Safari"
     end repeat
     if $CopyList then
         set the clipboard to the tabList
+        return "Copied"
     else
         return tabList as text
     end if
