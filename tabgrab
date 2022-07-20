@@ -41,7 +41,7 @@ tell application "Safari"
         set the clipboard to the tabList
         return "Copied"
     else
-        return tabList as text
+        return tabList
     end if
 end tell
 SCRIPT
