@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: TabGrabAll.sh            Collect tabs from all Safari windows as a
+                                markdown list with the first tab of each
+                                window as the parent of the remaining tabs;
+                                the list is put on the pasteboard.
+       TabGrabAll.sh -h|--help  Print this message and exit
+USAGE
+    exit 0
+fi
+
+osascript <<SCRIPT
+tell application "Safari"
+    set tabList to ""
+    set windowCount to count (every window)
+    repeat with x from 1 to windowCount
+        set tabCount to number of tabs in window x
+        repeat with y from 1 to tabCount
+            if y > 1 then
+                set tabList to tabList & "    "
+            end if
+            set tabName to name of tab y of window x
+            set tabURL to URL of tab y of window x as string
+            set tabList to tabList & "– [" & tabName & "](" & tabURL & ")" & linefeed as string
+        end repeat
+        set tabList to tabList & linefeed
+    end repeat
+    set the clipboard to the tabList
+end tell
+SCRIPT
