@@ -2,11 +2,11 @@
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: TabGrabAll.sh            Collect tabs from all Safari windows as a
-                                markdown list with the first tab of each
-                                window as the parent of the remaining tabs;
-                                the list is put on the pasteboard.
-       TabGrabAll.sh -h|--help  Print this message and exit
+usage: tabgrab              Collect tabs from all Safari windows as a markdown
+                            list with the first tab of each window as the
+                            parent of the remaining tabs
+
+       tabgrab -h|--help    Print this message and exit
 USAGE
     exit 0
 fi
@@ -29,6 +29,7 @@ tell application "Safari"
         end repeat
         set tabList to tabList & linefeed
     end repeat
-    set the clipboard to the tabList
+    -- set the clipboard to the tabList
+    return tabList as text
 end tell
 SCRIPT
