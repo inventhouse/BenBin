@@ -7,10 +7,16 @@
 # In Terminal prefs:
 # - General > Shells open with: Command /usr/local/bin/xonsh
 # - Profiles > Shell > Ask before closing: Only if there are processes other than: xonsh
-# FIXME: Stale, write new instructions:
-# In VS Code prefs: Terminal › Integrated › Shell: Osx > Edit settings in json, add:
-#    "terminal.integrated.shell.osx": "/usr/local/bin/xonsh",
-#    "terminal.integrated.automationShell.osx": "/bin/sh",
+# In VS Code prefs: Terminal › Integrated › Env: Osx
+# "Edit in settings.json" button
+# Replace the added `"terminal.integrated.env.osx":` block with:
+#     "terminal.integrated.profiles.osx": {
+#         "Xonsh": {
+#             "path": "/opt/homebrew/bin/xonsh",
+#             "args": []
+#         }
+#     },
+#     "terminal.integrated.defaultProfile.osx": "Xonsh",
 
 # Comment this out to see instructions for not skipping redundant aliases
 $FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = True
