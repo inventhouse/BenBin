@@ -41,9 +41,9 @@ import re
 # Left-prompt is constant char+space to maximize space and eliminate start-of-line noise; all info goes in the right-prompt
 # Right-prompt starts with constant char; this will allow relatively easy parsing of copied terminal lines
 if [ int(n) for n in $XONSH_VERSION.split(".") ] >= [0, 9, 23]:
-    $PROMPT = "{ret_code_color}⫸{RESET} "
+    $PROMPT = "{BOLD_BLUE}{last_return_code_if_nonzero:{BOLD_RED}}⫸{RESET} "
     $MULTILINE_PROMPT = "{BOLD_BLUE}…{RESET}"
-    $RIGHT_PROMPT = '{ret_code_color}●{RESET}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{RESET}'
+    $RIGHT_PROMPT = '{BOLD_BLUE}{last_return_code_if_nonzero:{BOLD_RED}}●{last_return_code_if_nonzero: {RED}[{}]}{RESET}{env_name}{branch_color}{curr_branch: {}} {BLUE}{cwd}{RESET}'
 else:  # HACK: remove this once RPi is on v0.9.23+
     $PROMPT = "{ret_code_color}⮞{NO_COLOR} "  # HACK: RPi doesn't have triple-nested-greater-than :'(
     $MULTILINE_PROMPT = "{BOLD_BLUE}…{NO_COLOR}"
