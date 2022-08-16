@@ -15,6 +15,10 @@ def _pbq(args, stdin=None):
     return None
 aliases["pbq"] = _pbq
 
+# Rewraps lines in the pasteboard so they are at most 72 characters long
+# alias pbw='pbpaste | fmt -72 | pbcopy'
+aliases["pbw"] = lambda: $[pbpaste | fmt | pbcopy]  # pipelines in aliases are tricky
+
 # alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'
 # aliases["pbc"] = lambda: $[pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy]  # pipelines in aliases are tricky
 def _pbc(args, stdin=None):
