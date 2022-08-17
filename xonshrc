@@ -37,6 +37,7 @@ $PATH.extend([
     "~/inventhub/allgit",
     "~/inventhub/bettergit",
     "~/inventhub/BenBin",
+    "~/scripts",
     "~/bin",
     ])
 
