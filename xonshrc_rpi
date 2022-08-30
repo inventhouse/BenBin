@@ -13,6 +13,7 @@ source ~/inventhub/BenBin/xonshrc
 # import re
 
 ###  Prompt  ###
+# TODO: try ⋙ `VERY MUCH GREATER-THAN` on rpi or ≫
 $PROMPT = "{ret_code_color}⮞{NO_COLOR} "  # HACK: RPi doesn't have triple-nested-greater-than :'(
 if [ int(n) for n in $XONSH_VERSION.split(".") ] < [0, 9, 23]:
     # HACK: remove this once RPi is on v0.9.23+
