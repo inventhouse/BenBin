@@ -3,13 +3,14 @@
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: tabgrab              Collect tabs from all Safari windows as a markdown
-                            list with the first tab of each window as the
-                            parent of the remaining tabs
+usage: tabgrab [-h|--help] [-c|--copy] [BROWSER]
+       Collect tabs from all windows as a markdown list of links with
+       the first tab of each window as the parent of the remaining tabs.
+       BROWSER default to Safari or the BROWSER_APP environment variable.
 
-       tabgrab -c|--copy    Copies the list to the pasteboard
+       -c, --copy    Copies the list to the pasteboard
 
-       tabgrab -h|--help    Print this message and exit
+       -h, --help    Print this message and exit
 USAGE
     exit 0
 fi
@@ -17,12 +18,17 @@ fi
 CopyList="false"
 if [ "$1" == "-c" -o "$1" == "--copy" ]; then
     CopyList="true"
+    shift
 fi
+
+# TODO: Find default automatically; something like this, test with chrome set as default and simplify: "defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | awk -F'\"' '/http;/{print window[(NR)-1]}{window[NR]=$2}'"
+Browser="${1:-${BROWSER_APP:-Safari}}"
+
 
 # Hacked from [Capture all tabs in Safari as URLs to the clipboard – theconsultant.net](https://theconsultant.net/2017/06/capture-all-tabs-in-safari-as-urls-to-the-clipboard/)
 
 osascript <<SCRIPT
-tell application "Safari"
+tell application "$Browser"
     set tabList to ""
     set windowCount to count (every window)
     repeat with x from 1 to windowCount
