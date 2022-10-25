@@ -22,6 +22,10 @@ if [ "$1" == "-c" -o "$1" == "--copy" ]; then
 fi
 
 # TODO: Find default automatically; something like this, test with chrome set as default and simplify: "defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | awk -F'\"' '/http;/{print window[(NR)-1]}{window[NR]=$2}'"
+#⫸ defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | grep -B1 "LSHandlerURLScheme = https" | head -1             ● ~
+#            LSHandlerRoleAll = "com.apple.safari";
+#⫸ defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | grep -B1 "LSHandlerURLScheme = https" | head -1             ● ~
+#            LSHandlerRoleAll = "com.google.chrome";
 Browser="${1:-${BROWSER_APP:-Safari}}"
 
 
