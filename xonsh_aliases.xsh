@@ -55,6 +55,7 @@ if !(which allgit_dev):  # Special symlink to keep uing the dev version
 aliases["dkr"] = "docker"
 aliases["dkc"] = "docker-compose"
 aliases["tf"] = "terraform"
+aliases["per"] = "pipenv run"
 
 # Snippets:
 aliases["snip-clog"] = lambda: $[echo 'console.log({ "": {}, })  // BJH: NOCOMMIT    ' | pbcopy]

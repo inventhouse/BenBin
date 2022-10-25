@@ -23,7 +23,7 @@ $FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = True
 
 # XONSH WIZARD START
 source-bash "echo loading xonsh foreign shell"
-xontrib load coreutils prompt_ret_code vox
+xontrib load coreutils vox
 # XONSH WIZARD END
 
 ###  Path  ###
