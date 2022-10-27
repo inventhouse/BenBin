@@ -32,7 +32,7 @@ if [ -z "$Browser" ]; then
     elif [ "$Handler" == "com.google.chrome" ]; then
         Browser="Chrome"
     else
-        # Try the last token of the the handler, doesn't work with Firefox for one :shrug:
+        # Try the last token of the the handler, this would work for Safari and Chrome, but doesn't work with Firefox for some reason :shrug:
         Browser=`echo "$Handler" | tr '.' '\n' | tail -1`
         echo "Guessing $Browser (it may not work)"
     fi
