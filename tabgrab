@@ -8,7 +8,8 @@ if [ "$1" == "-h" -o "$1" == "--help" ]; then
 usage: tabgrab [-h|--help] [-c|--copy] [BROWSER]
        Collect tabs from all windows as a markdown list of links with
        the first tab of each window as the parent of the remaining tabs.
-       BROWSER default to Safari or the BROWSER_APP environment variable.
+       BROWSER defaults to the BROWSER_APP environment variable, otherwise
+       the default handler for 'https' is used to guess the system browser.
 
        -c, --copy    Copies the list to the pasteboard
 
@@ -23,19 +24,21 @@ if [ "$1" == "-c" -o "$1" == "--copy" ]; then
     shift
 fi
 
-# TODO: Find default automatically; something like this, test with chrome set as default and simplify: "defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | awk -F'\"' '/http;/{print window[(NR)-1]}{window[NR]=$2}'"
-#⫸ defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | grep -B1 "LSHandlerURLScheme = https" | head -1             ● ~
-#            LSHandlerRoleAll = "com.apple.safari";
-#⫸ defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | grep -B1 "LSHandlerURLScheme = https" | head -1             ● ~
-#            LSHandlerRoleAll = "com.google.chrome";
 Browser="${1:-${BROWSER_APP}}"
 if [ -z "$Browser" ]; then
     Handler=`defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | grep -B1 "LSHandlerURLScheme = https" | head -1 | cut -d '"' -f 2`
     if [ -z "$Handler" -o "$Handler" == "com.apple.safari" ]; then
         Browser="Safari"
     elif [ "$Handler" == "com.google.chrome" ]; then
-        Browser="Google Chrome"
+        Browser="Chrome"
+    else
+        # Try the last token of the the handler, doesn't work with Firefox for one :shrug:
+        Browser=`echo "$Handler" | tr '.' '\n' | tail -1`
+        echo "Guessing $Browser (it may not work)"
     fi
+    Bold=`tput bold`
+    Off=`tput sgr0`
+    echo "${Bold}Grabbing tabs from ${Browser}${Off}"
 fi
 
 # Hacked from [Capture all tabs in Safari as URLs to the clipboard – theconsultant.net](https://theconsultant.net/2017/06/capture-all-tabs-in-safari-as-urls-to-the-clipboard/)
