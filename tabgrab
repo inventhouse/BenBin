@@ -38,7 +38,7 @@ if [ -z "$Browser" ]; then
     fi
     Bold=`tput bold`
     Off=`tput sgr0`
-    echo "${Bold}Grabbing tabs from ${Browser}${Off}"
+    echo "${Bold}Grabbing tabs from ${Browser}${Off}" >&2
 fi
 
 # Hacked from [Capture all tabs in Safari as URLs to the clipboard – theconsultant.net](https://theconsultant.net/2017/06/capture-all-tabs-in-safari-as-urls-to-the-clipboard/)
