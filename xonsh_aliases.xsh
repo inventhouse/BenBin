@@ -19,8 +19,12 @@ aliases["pbq"] = _pbq
 # alias pbw='pbpaste | fmt -72 | pbcopy'
 aliases["pbw"] = lambda: $[pbpaste | fmt | pbcopy]  # pipelines in aliases are tricky
 
+# Sorts lines in the pasteboard
+# alias pbs='pbpaste | sort | pbcopy'
+aliases["pbs"] = lambda: $[pbpaste | sort | pbcopy]
+
 # alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'
-# aliases["pbc"] = lambda: $[pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy]  # pipelines in aliases are tricky
+# aliases["pbc"] = lambda: $[pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy]
 def _pbc(args, stdin=None):
     "Strips #-style comments from the lines in the pasteboard so they can be pasted"
     lines = !(pbpaste)
