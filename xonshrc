@@ -44,6 +44,10 @@ $PATH.extend([
 ###  Imports  ###
 import re
 
+# [DeprecationWarning: There is no current event loop · Issue #1696 · prompt-toolkit/python-prompt-toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit/issues/1696)
+# [Prompt toolkit broke after update · Issue #5016 · xonsh/xonsh](https://github.com/xonsh/xonsh/issues/5016)
+__import__('warnings').filterwarnings('ignore', 'There is no current event loop', DeprecationWarning, 'prompt_toolkit.eventloop.utils')
+
 ###  Prompt  ###
 # Left-prompt is constant char+space to maximize space and eliminate start-of-line noise; all info goes in the right-prompt
 # Right-prompt starts with constant char; this will allow relatively easy parsing of copied terminal lines
