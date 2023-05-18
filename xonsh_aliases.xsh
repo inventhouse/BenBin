@@ -15,6 +15,14 @@ def _pbq(args, stdin=None):
     return None
 aliases["pbq"] = _pbq
 
+# alias pbq='pbpaste | sed -e "s/^/> /" | pbcopy'
+def _pbq(args, stdin=None):
+    "Adds '> ' to the lines in the pasteboard so they can be pasted as a Markdown block quote"
+    lines = [ f"> {s}" for s in !(pbpaste) ]
+    echo -n @("".join(lines)) | pbcopy
+    return None
+aliases["pbq"] = _pbq
+
 # Rewraps lines in the pasteboard so they are at most 72 characters long
 # alias pbw='pbpaste | fmt -72 | pbcopy'
 aliases["pbw"] = lambda: $[pbpaste | fmt | pbcopy]  # pipelines in aliases are tricky
@@ -49,6 +57,9 @@ def _pbu(args, stdin=None):
     echo -n @("".join(lines)) | pbcopy
     return None
 aliases["pbu"] = _pbu
+
+# alias pbsqlfix='pbpaste | sqlfluff fix --dialect postgres - | pbcopy'  # FIXME: translate fix-or-lint/format into standard alias
+aliases["pbsqlfix"] = lambda: $[pbpaste | sqlfluff fix --dialect postgres - | pbcopy] or $[pbpaste | sqlfluff lint --dialect postgres -]
 
 aliases["adb"] = "~/Library/Android/sdk/platform-tools/adb"
 
