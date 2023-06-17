@@ -15,14 +15,6 @@ def _pbq(args, stdin=None):
     return None
 aliases["pbq"] = _pbq
 
-# alias pbq='pbpaste | sed -e "s/^/> /" | pbcopy'
-def _pbq(args, stdin=None):
-    "Adds '> ' to the lines in the pasteboard so they can be pasted as a Markdown block quote"
-    lines = [ f"> {s}" for s in !(pbpaste) ]
-    echo -n @("".join(lines)) | pbcopy
-    return None
-aliases["pbq"] = _pbq
-
 # Rewraps lines in the pasteboard so they are at most 72 characters long
 # alias pbw='pbpaste | fmt -72 | pbcopy'
 aliases["pbw"] = lambda: $[pbpaste | fmt | pbcopy]  # pipelines in aliases are tricky
@@ -30,6 +22,13 @@ aliases["pbw"] = lambda: $[pbpaste | fmt | pbcopy]  # pipelines in aliases are t
 # Sorts lines in the pasteboard
 # alias pbs='pbpaste | sort | pbcopy'
 aliases["pbs"] = lambda: $[pbpaste | sort | pbcopy]
+
+# Format json with jq - brew install jq
+# alias pbw='pbpaste | jq "." | pbcopy'
+aliases["pbjq"] = lambda: $[pbpaste | jq '.' | pbcopy]
+
+# alias pbdotpath='pbpaste | sed -e "s/\.[^.]*$//" | tr "/" "." | pbcopy'
+aliases["pbdotpath"] = lambda: $[pbpaste | sed -e "s/\.[^.]*$//" | tr "/" "." | pbcopy]
 
 # alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'
 # aliases["pbc"] = lambda: $[pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy]
