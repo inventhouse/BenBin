@@ -27,8 +27,8 @@ aliases["pbs"] = lambda: $[pbpaste | sort | pbcopy]
 # alias pbw='pbpaste | jq "." | pbcopy'
 aliases["pbjq"] = lambda: $[pbpaste | jq '.' | pbcopy]
 
-# alias pbdotpath='pbpaste | sed -e "s/\.[^.]*$//" | tr "/" "." | pbcopy'
-aliases["pbdotpath"] = lambda: $[pbpaste | sed -e "s/\.[^.]*$//" | tr "/" "." | pbcopy]
+# alias pbdotpath='pbpaste | sed -e "s/\\.[^.]*$//" | tr "/" "." | pbcopy'
+aliases["pbdotpath"] = lambda: $[pbpaste | sed -e 's/\\.[^.]*$//' | tr "/" "." | pbcopy]
 
 # alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'
 # aliases["pbc"] = lambda: $[pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy]
