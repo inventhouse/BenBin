@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2022 Benjamin Holt -- MIT License
+# Copyright (c) 2022-2023 Benjamin Holt -- MIT License
 
 set -e
 
@@ -47,14 +47,14 @@ osascript <<SCRIPT
 tell application "$Browser"
     set tabList to ""
     set windowCount to count (every window)
-    repeat with x from 1 to windowCount
-        set tabCount to number of tabs in window x
-        repeat with y from 1 to tabCount
-            if y > 1 then
+    repeat with w from 1 to windowCount
+        set tabCount to number of tabs in window w
+        repeat with t from 1 to tabCount
+            if t > 1 then
                 set tabList to tabList & "    "
             end if
-            set tabName to name of tab y of window x
-            set tabURL to URL of tab y of window x as string
+            set tabName to name of tab t of window w
+            set tabURL to URL of tab t of window w as string
             set tabList to tabList & "- [" & tabName & "](" & tabURL & ")" & linefeed as string
         end repeat
         set tabList to tabList & linefeed
