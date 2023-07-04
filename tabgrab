@@ -1,7 +1,8 @@
 #!/bin/bash
 # Copyright (c) 2022-2023 Benjamin Holt -- MIT License
 
-set -e
+set -eo pipefail
+# set -x  # Uncomment for debugging
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
@@ -13,16 +14,29 @@ usage: tabgrab [-h|--help] [-c|--copy] [BROWSER]
 
        -c, --copy    Copies the list to the pasteboard
 
+       -n, --num-windows N
+                     Collects tabs from the first N windows, defaults to
+                     all windows
+
        -h, --help    Print this message and exit
 USAGE
     exit 0
 fi
 
 CopyList="false"
-if [ "$1" == "-c" -o "$1" == "--copy" ]; then
-    CopyList="true"
-    shift
-fi
+NumWindows="count (every window)"
+for arg in $@; do
+    case "$arg" in
+        -c|--copy)
+            CopyList="true"
+            shift
+            ;;
+        -n|--num-windows)
+            NumWindows="$2"
+            shift 2
+            ;;
+    esac
+done
 
 Browser="${1:-${BROWSER_APP}}"
 if [ -z "$Browser" ]; then
@@ -32,7 +46,7 @@ if [ -z "$Browser" ]; then
     elif [ "$Handler" == "com.google.chrome" ]; then
         Browser="Chrome"
     else
-        # Try the last token of the the handler, this would work for Safari and Chrome, but doesn't work with Firefox for some reason :shrug:
+        # Try the last token of the the handler, this would work for Safari and Chrome, but doesn't work with Firefox which doesn't offer tabs in its scripting dictionary :shrug:
         Browser=`echo "$Handler" | tr '.' '\n' | tail -1`
         echo "Guessing $Browser (it may not work)"
     fi
@@ -46,7 +60,7 @@ fi
 osascript <<SCRIPT
 tell application "$Browser"
     set tabList to ""
-    set windowCount to count (every window)
+    set windowCount to $NumWindows
     repeat with w from 1 to windowCount
         set tabCount to number of tabs in window w
         repeat with t from 1 to tabCount
