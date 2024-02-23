@@ -1,0 +1,16 @@
+#!/bin/sh
+# set -x  # Uncomment for debugging
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+Usage:  localenv <command>
+    This will run load environment variables from a file called 'local.env' in
+    the current directory and run the command.
+    Warning: there may be issues with quoting and escaping of the command or
+    its arguments.
+USAGE
+    exit 0
+fi
+
+`cat local.env | sed -e 's/^/export /'`
+$@  # This is generally a terrible idea, never do this.
