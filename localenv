@@ -28,6 +28,11 @@ else
     done
 fi
 
+if [ -z "$DotEnv" ]; then
+    echo "No environment file found; specify one with -f or run with -h for help" >&2
+    exit 1
+fi
+
 if [ ! -f "$DotEnv" ]; then
     echo "Environment file '$DotEnv' not found" >&2
     exit 1
