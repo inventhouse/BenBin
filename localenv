@@ -1,16 +1,38 @@
 #!/bin/sh
+# Copyright (c) 2024 Benjamin Holt -- MIT License
+
+set -eo pipefail
 # set -x  # Uncomment for debugging
 
-if [ "$1" == "-h" -o "$1" == "--help" ]; then
+# Why doesn't /usr/bin/env have a -f option??
+if [ -z "$1" -o "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-Usage:  localenv <command>
-    This will run load environment variables from a file called 'local.env' in
-    the current directory and run the command.
+Usage:  localenv [-f FILE] <command>
+    This will run load environment variables from a file and run the command.
+    FILE defaults to 'local.env' or '.env' whichever is found first.
     Warning: there may be issues with quoting and escaping of the command or
     its arguments.
 USAGE
     exit 0
 fi
 
-`cat local.env | sed -e 's/^/export /'`
-$@  # This is generally a terrible idea, never do this.
+if [ "$1" == "-f" ]; then
+    DotEnv="$2"
+    shift; shift
+else
+    for f in "local.env" ".env"; do
+        if [ -f "$f" ]; then
+            DotEnv="$f"
+            break
+        fi
+    done
+fi
+
+if [ ! -f "$DotEnv" ]; then
+    echo "Environment file '$DotEnv' not found" >&2
+    exit 1
+fi
+
+# Strip #-style comments and blank lines and run the remaining lines with 'export'
+`cat "$DotEnv" | sed -e 's/  *#.*//' -e '/^#.*/d' -e '/^ *$/d' -e 's/^/export /'`
+$@  # Run the rest of the args as a command
