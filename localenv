@@ -38,6 +38,6 @@ if [ ! -f "$DotEnv" ]; then
     exit 1
 fi
 
-# Strip #-style comments and blank lines and run the remaining lines with 'export'
+# Strip #-style comments and blank lines, then run the remaining lines with 'export'
 `cat "$DotEnv" | sed -e 's/  *#.*//' -e '/^#.*/d' -e '/^ *$/d' -e 's/^/export /'`
-$@  # Run the rest of the args as a command
+$@  # Run remaining args as a command
