@@ -53,6 +53,6 @@ git add -A
 echo "----------------------------------------------------------------------"
 git status
 echo "----------------------------------------------------------------------"
-echo "${Bold}Squashed: $BranchHashes${Off}"
+echo "${Bold}Squashed:${Off} $BranchHashes"
 echo "Now git commit with a message for the single commit and force-push (or undo with 'git reset --hard && git pull')"
 ###
