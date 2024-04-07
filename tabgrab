@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2022-2023 Benjamin Holt -- MIT License
+# Copyright (c) 2022-2024 Benjamin Holt -- MIT License
 
 set -eo pipefail
 # set -x  # Uncomment for debugging
