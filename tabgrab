@@ -40,7 +40,7 @@ done
 
 Browser="${1:-${BROWSER_APP}}"
 if [ -z "$Browser" ]; then
-    Handler=`defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | grep -B1 "LSHandlerURLScheme = https" || echo -n "" | head -1 | cut -d '"' -f 2`
+    Handler=`defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | (grep -B1 "LSHandlerURLScheme = https" || echo -n "") | head -1 | cut -d '"' -f 2`
     if [ -z "$Handler" -o "$Handler" == "com.apple.safari" ]; then
         Browser="Safari"
     elif [ "$Handler" == "com.google.chrome" ]; then
