@@ -32,6 +32,7 @@ $PATH[0:0] = [
     "/opt/homebrew/sbin",
     "/usr/local/opt/python3/bin/",
     "/usr/local/bin",
+    "/usr/sbin",
     ]
 $PATH.extend([
     "~/inventhub/allgit",
