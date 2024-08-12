@@ -1,0 +1,30 @@
+#!/bin/sh
+# Copyright (c) 2024 Benjamin Holt -- MIT License
+
+# Somewhat hacky script to automate saving tabgrab dumps to dated files and maintaining the "latest" link
+
+set -eo pipefail
+# set -x  # Uncomment for debugging
+
+Bold=`tput bold`
+Off=`tput sgr0`
+
+: ${TABDUMP_DIR:="/tmp/"}
+: ${TABDUMP_SLUG:="TabDump"}
+: ${TABDUMP_LATEST:="latest.md"}
+Today=`date "+%Y-%m-%d"`
+TabDumpFile="${TABDUMP_DIR}/${TABDUMP_SLUG}_${Today}.md"
+LatestFile="${TABDUMP_DIR}/${TABDUMP_LATEST}"
+
+if [ -e "$TabDumpFile" ]; then
+    echo "File already exists: $TabDumpFile" >&2
+    exit 1
+fi
+
+tabgrab > "$TabDumpFile"
+echo "${Bold}Wrote ${TabDumpFile}${Off}" >&2
+
+if [ -e "${LatestFile}" ]; then
+    ln -f "$TabDumpFile" "${LatestFile}"
+    echo "${Bold}Updated ${LatestFile}${Off}" >&2
+fi
