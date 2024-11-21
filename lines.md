@@ -14,16 +14,22 @@ Random Thoughts
 To Do
 -----
 
-- Use stdin, both as default and specified with `-`
-- Handle stdout closing (e.g. `lines ... | tail`)
+- Start with _only_ stdin, no files; `cat` in whatever you want
+- Handle stdout closing (e.g. `lines ... | head`)
+
+- Add file args; file names may be useful context when doing multi-file processing
 
 - Parse args
     - `lines COMMAND ... -- FILE ...` or `lines -e COMMAND -e... FILE ...`?
         - Leaning toward the former, but latter is more standard
     - Commands are command + separator (`(?P<cmd>[a-z]+)(?P<sep>[^a-z])`), fields split by separator, command options
         - Separator is a single character following the command, used through the rest of the command; no escape sequence, use onethat doesn't appear; recommend bullet (`•`) - not used in regex, easy to type (`opt-8`)
-        - Short and long commands? - YES
-        - Short and long options?
+        - Short and long commands? - YES, quick vs. readability/maintainability uses for both with commands and options
+        - Short and long options? - YES
+            - Option syntax?
+                - Maybe something like`(?P<short_letters_block>[\w-]*);?(?P<long_opt>[\w-]+(:(?P<opt_arg>[\w-]+(,...)?)?;?...)`
+                - Definitely want option-parser utility, operations should get kwargs
+                    - Should common options like RE flags be parsed here?
 
 - Top-level options
     - Script file option
@@ -51,8 +57,10 @@ To Do
     - Buffering for pre-context?
     - Print control for post-context or to change default pass/drop?
     - Store/recall to move extracted values between lines?
+        - Indentation level?
     - If/else?
     - Global `else`?  (i.e. all the lines that were simply passed by other operations)
+    - Operate on file-change?
 
 ### Doneyard
 

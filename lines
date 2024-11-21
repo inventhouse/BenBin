@@ -4,28 +4,49 @@
 # Sed-inspired line processor using modern Python regex and format syntax
 
 import re
+import sys
 
 
 ###  Main  ###
 def main(args):
-    ...
+    # For now, the only args are command strings
+    operations = [parse_command(c) for c in args[1:]]
+    parse_lines(operations)
 
 
-def lines(processors, *files):
-    for file in files:
-        with open(file) as f:
-            for n,line in enumerate(f, start=1):
-                context = {"File": file, "Line": line, "LineNum": n}
-                for p in processors:
-                    line, context = p(line, context)
-                    if line is None:
-                        break
-                else:
-                    print(line, end="")
+def parse_lines(processors):
+    # for file in files:
+    #     with open(file) as f:
+    for n,line in enumerate(sys.stdin, start=1):
+        context = {"Line": line, "LineNum": n}
+        for p in processors:
+            line, context = p(line, context)
+            if line is None:
+                break
+        else:
+            print(line, end="")  # REM: consider yielding lines, so `main` is the one dealing with files and output
 #####
 
 
-###  Processing Classes  ###
+###  Command Parsing  ###
+CMD_BASE_RE = re.compile(r"(?P<cmd>[a-z]+)(?P<sep>[^a-z])(?P<rest>.*)")
+def parse_command(cmd_str):
+    m = CMD_BASE_RE.match(cmd_str)
+    if not m:
+        raise ValueError(f"Could not parse command '{cmd_str}'")
+    cmd, sep, rest = (m.group("cmd"), m.group("sep"), m.group("rest"))
+    if cmd not in CMD_MAP:
+        raise ValueError(f"Unrecognized command '{cmd}'")
+    split_rest = rest.split(sep)
+    args = split_rest[:-1]
+    opts = split_rest[-1]
+    # print(f"{cmd = }, {sep = }, {args = }, {opts = }")
+    Op = CMD_MAP[cmd]
+    return Op(*args, opts)
+#####
+
+
+###  Operation Classes  ###
 class Filter:
     def __init__(self, pattern, options):
         # TODO: Add options like invert and re.IGNORECASE
@@ -34,6 +55,7 @@ class Filter:
     def __call__(self, line, context):
         m = self.pattern.match(line)
         if m:
+            # TODO: mark context as matched (or something?)
             context.update(m.groupdict())  # Match groups can be used in later transformers
             return line, context
         return None, context
@@ -47,12 +69,21 @@ class Transformer:
     def __call__(self, line, context):
         m = self.pattern.match(line)
         if m:
+            # TODO: mark context as matched (or something?)
             context.update(m.groupdict())
-            return fmt.format(**context), context
+            return fmt.format(**context), context  # FIXME: use subn to replace all matches
         return None, context
+
+
+CMD_MAP = {
+    "f": Filter,
+    "filter": Filter,
+    "t": Transformer,
+    "trans": Transformer,
+    "transform": Transformer,
+}
 #####
 
 if __name__ == '__main__':
-    import sys
     _xit = main(sys.argv)
     sys.exit(_xit)
