@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+
+# "Lines Is Not Exactly Sed"
+# Sed-inspired line processor using modern Python regex and format syntax
+
+import re
+
+
+###  Main  ###
+def main(args):
+    ...
+
+
+def lines(processors, *files):
+    for file in files:
+        with open(file) as f:
+            for n,line in enumerate(f, start=1):
+                context = {"File": file, "Line": line, "LineNum": n}
+                for p in processors:
+                    line, context = p(line, context)
+                    if line is None:
+                        break
+                else:
+                    print(line, end="")
+#####
+
+
+###  Processing Classes  ###
+class Filter:
+    def __init__(self, pattern, options):
+        # TODO: Add options like invert and re.IGNORECASE
+        self.pattern = re.compile(pattern)
+
+    def __call__(self, line, context):
+        m = self.pattern.match(line)
+        if m:
+            context.update(m.groupdict())  # Match groups can be used in later transformers
+            return line, context
+        return None, context
+
+
+class Transformer:
+    def __init__(self, pattern, fmt, options):
+        # TODO: Add options like pass/drop and re.IGNORECASE
+        self.pattern = re.compile(pattern)
+
+    def __call__(self, line, context):
+        m = self.pattern.match(line)
+        if m:
+            context.update(m.groupdict())
+            return fmt.format(**context), context
+        return None, context
+#####
+
+if __name__ == '__main__':
+    import sys
+    _xit = main(sys.argv)
+    sys.exit(_xit)
