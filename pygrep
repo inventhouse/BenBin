@@ -19,9 +19,8 @@ def main(argv):
 
 def search(pattern, lines):
     for l in lines:
-        l = l.rstrip()
         if pattern.search(l):
-            print(l)
+            print(l, end="")
 
 
 if __name__ == "__main__":
