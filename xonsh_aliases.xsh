@@ -20,6 +20,10 @@ aliases["pbq"] = _pbq
 aliases["pbw"] = lambda: $[pbpaste | fmt | pbcopy]  # pipelines in aliases are tricky
 
 # Sorts lines in the pasteboard
+# alias pbs='pbpaste | wc'
+aliases["pbwc"] = lambda: $[pbpaste | wc]
+
+# Sorts lines in the pasteboard
 # alias pbs='pbpaste | sort | pbcopy'
 aliases["pbs"] = lambda: $[pbpaste | sort | pbcopy]
 
