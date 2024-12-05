@@ -11,7 +11,7 @@ import sys
 def main(args):
     # For now, the only args are command strings
     operations = [parse_command(c) for c in args[1:]]
-    # print(f"{operations = }")  # TODO: better __str__ for operations, some sort of debug flag/mode
+    # print(f"{operations = }")  # TODO: some sort of debug flag/mode
     parse_lines(operations, sys.stdin)
 
 
@@ -59,6 +59,9 @@ class Filter:
             return line, context
         return None, context
 
+    def __repr__(self):
+        return f"<Filter({self.pattern}) at {id(self)}>"
+
 
 class Transformer:
     def __init__(self, pattern, fmt, options):
@@ -73,6 +76,9 @@ class Transformer:
             context.update(m.groupdict())
             return self.fmt.format(**context) + "\n", context  # FIXME: use subn to replace all matches
         return None, context
+
+    def __repr__(self):
+        return f"<Transformer({self.pattern}, {self.fmt}) at {id(self)}>"
 
 
 CMD_MAP = {
