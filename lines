@@ -11,20 +11,19 @@ import sys
 def main(args):
     # For now, the only args are command strings
     operations = [parse_command(c) for c in args[1:]]
-    parse_lines(operations)
+    # print(f"{operations = }")  # TODO: better __str__ for operations, some sort of debug flag/mode
+    parse_lines(operations, sys.stdin)
 
 
-def parse_lines(processors):
-    # for file in files:
-    #     with open(file) as f:
-    for n,line in enumerate(sys.stdin, start=1):
-        context = {"Line": line, "LineNum": n}
+def parse_lines(processors, lines):
+    for n,l in enumerate(lines, start=1):
+        context = {"Line": l, "LineNum": n}
         for p in processors:
-            line, context = p(line, context)
-            if line is None:
+            l, context = p(l, context)
+            if l is None:
                 break
         else:
-            print(line, end="")  # REM: consider yielding lines, so `main` is the one dealing with files and output
+            print(l, end="")  # REM: consider yielding lines, so `main` is the one dealing with files and output
 #####
 
 
@@ -65,13 +64,14 @@ class Transformer:
     def __init__(self, pattern, fmt, options):
         # TODO: Add options like pass/drop and re.IGNORECASE
         self.pattern = re.compile(pattern)
+        self.fmt = fmt
 
     def __call__(self, line, context):
         m = self.pattern.match(line)
         if m:
             # TODO: mark context as matched (or something?)
             context.update(m.groupdict())
-            return fmt.format(**context), context  # FIXME: use subn to replace all matches
+            return self.fmt.format(**context) + "\n", context  # FIXME: use subn to replace all matches
         return None, context
 
 
