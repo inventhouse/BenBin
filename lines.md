@@ -14,7 +14,7 @@ Random Thoughts
 To Do
 -----
 
-- Start with _only_ stdin, no files; `cat` in whatever you want
+- DONE: Start with _only_ stdin, no files; `cat` in whatever you want
 - Handle stdout closing (e.g. `lines ... | head`)
 
 - Add file args; file names may be useful context when doing multi-file processing
@@ -32,9 +32,12 @@ To Do
                     - Should common options like RE flags be parsed here?
 
 - Top-level options
+    - Add `argparse`
     - Script file option
     - Trace/verbose/debug
     - Default pass/drop?
+    - Help
+        - Build command help from `CMD_MAP` and Operation class docstrings
 
 - Processors
     - Commands map to processors which form a pipeline
