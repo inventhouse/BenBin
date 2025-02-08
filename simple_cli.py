@@ -133,16 +133,6 @@ class TestRunMain(unittest.TestCase):
         run_main(main, ("--stuff-thing", "--foo-bar=baz",))
         main.assert_called_once_with(**{"stuff-thing": True, "foo-bar": "baz"})
 
-    def test_weird_characters(self):
-        main = Mock()
-        run_main(main, ("-?", "-b*", "-a%=wut", "--bar$=baz?", "arg1?"))
-        main.assert_called_once_with('arg1?', **{"?": True, "b":True, "*": True, "a": True, "%": "wut", "bar$":"baz?"})
-
-    def test_dash_value(self):
-        main = Mock()
-        run_main(main, ("-i=-", "--input=-", "--foo=-bar-",))
-        main.assert_called_once_with(i='-', input='-', foo='-bar-')
-
     def test_args(self):
         main = Mock()
         run_main(main, ("arg1", "arg2"))
@@ -187,6 +177,16 @@ class TestRunMain(unittest.TestCase):
         main = Mock()
         run_main(main, ["-a", "--", "-f"])
         main.assert_called_once_with("-f", a=True)
+
+    def test_weird_characters(self):
+        main = Mock()
+        run_main(main, ("-?", "-b*", "-a%=wut", "--bar$=baz?", "arg1?"))
+        main.assert_called_once_with('arg1?', **{"?": True, "b":True, "*": True, "a": True, "%": "wut", "bar$":"baz?"})
+
+    def test_dash_value(self):
+        main = Mock()
+        run_main(main, ("-i=-", "--input=-", "--foo=-bar-",))
+        main.assert_called_once_with(i='-', input='-', foo='-bar-')
 
 
 if __name__ == "__main__":
