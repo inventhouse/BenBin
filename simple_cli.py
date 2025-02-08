@@ -5,19 +5,25 @@
 
 import re
 import unittest
+from typing import Any, Callable, List, Optional, Union
 from unittest.mock import Mock
+
+ExitCode = Union[None, int, str]
 #####
 
 
 ###  Run Main  ###
-def run_main(main, arg_list, usage=None):
+def run_main(
+        main: Callable[..., ExitCode],
+        arg_list: List[str],
+        usage: Optional[Callable[[], ExitCode]] = None
+    ) -> ExitCode:
     """
-    A simple command-line interface parser that is better than grubbing through sys.argv yourself when argparse is overkill
+    A simple parser that translates command-line arguments and options into Python args and kwargs. 
 
     Features:
     - Parses options and arguments from a list of strings and passes them to a main function with no setup needed
     - Automatically recognizes -h / --help when given a usage function
-    - Long options are converted to snake_case (e.g. --foo-bar --> foo_bar, but other punctuation is preserved)
     - Short and long boolean flags (-f / --foo)
     - Combined short flags (-abc == -a -b -c)
     - Negative flags (--foo / --no-foo)
@@ -57,43 +63,42 @@ def run_main(main, arg_list, usage=None):
         if args_only:
             args.append(arg)
             continue
-        if arg == "--":
-            args_only = True
-            continue
-        if usage and arg in ("-h", "--help"):
-            return usage()
-        if re.match(r"--[^-]", arg):
-            arg = arg.lstrip("-")
-            if "=" in arg:
-                # Only supports --foo=bar, not --foo bar
-                k, _, v = arg.partition("=")
-            else:
-                # --foo --> {"foo": True}
-                # --no-foo --> {"foo": False}
-                v = not arg.startswith("no-")
-                k = arg.removeprefix("no-")
-            options[k.replace("-", "_")] = v
-            continue
-        if re.match(r"-[^-]", arg):
-            arg = arg.lstrip("-")
-            last_opt = None
-            if "=" in arg:
-                # Only supports -f=bar, not -f bar
-                opts, _, val = arg.partition("=")
-                arg, last_opt = opts[:-1], opts[-1]
-            options.update({k: True for k in arg})
-            if last_opt:
-                # Must process in order
-                options[last_opt] = val
-            continue
-        args.append(arg)
+
+        match arg:
+            ## Miscellany
+            case "--":
+                args_only = True
+            case "-h" | "--help" if usage:
+                return usage()
+            ## Long options
+            case _ if re.match(r"--[^-]", arg):
+                arg = arg.lstrip("-")
+                if "=" in arg:
+                    k, _, v = arg.partition("=")
+                else:
+                    v = not arg.startswith("no-")
+                    k = arg.removeprefix("no-")
+                options[k] = v
+            ## Short options
+            case _ if re.match(r"-[^-]", arg):
+                arg = arg.lstrip("-")
+                last_opt = None
+                if "=" in arg:
+                    opts, _, val = arg.partition("=")
+                    arg, last_opt = opts[:-1], opts[-1]
+                options.update({k: True for k in arg})
+                if last_opt:
+                    options[last_opt] = val
+            ## Anything else is an argument
+            case _:
+                args.append(arg)
 
     return main(*args, **options)
 #####
 
 
 ###  Tests  ###
-class TestSimpleCLI(unittest.TestCase):
+class TestRunMain(unittest.TestCase):
     def test_usage(self):
         main = Mock()
         usage = Mock(return_value=0)
@@ -126,7 +131,7 @@ class TestSimpleCLI(unittest.TestCase):
     def test_muli_word_options(self):
         main = Mock()
         run_main(main, ("--stuff-thing", "--foo-bar=baz",))
-        main.assert_called_once_with(stuff_thing=True, foo_bar="baz")
+        main.assert_called_once_with(**{"stuff-thing": True, "foo-bar": "baz"})
 
     def test_weird_characters(self):
         main = Mock()

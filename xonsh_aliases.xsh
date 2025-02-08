@@ -64,6 +64,9 @@ aliases["pbu"] = _pbu
 # alias pbsqlfix='pbpaste | sqlfluff fix --dialect postgres - | pbcopy'  # FIXME: translate fix-or-lint/format into standard alias
 aliases["pbsqlfix"] = lambda: $[pbpaste | sqlfluff fix --dialect postgres - | pbcopy] or $[pbpaste | sqlfluff lint --dialect postgres -]
 
+# alias pbxmlfix='pbpaste | xmllint --format - | pbcopy'
+aliases["pbxmlfix"] = lambda: $[pbpaste | xmllint --format - | pbcopy]
+
 aliases["adb"] = "~/Library/Android/sdk/platform-tools/adb"
 
 aliases["ag"] = "allgit"

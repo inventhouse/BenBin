@@ -14,7 +14,7 @@ Random Thoughts
 To Do
 -----
 
-- DONE: Start with _only_ stdin, no files; `cat` in whatever you want
+- DONE: Start with _only_ stdin, no files; `<` or `cat|` in whatever you want
 - Handle stdout closing (e.g. `lines ... | head`)
 
 - Add file args; file names may be useful context when doing multi-file processing
