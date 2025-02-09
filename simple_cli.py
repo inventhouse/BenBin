@@ -216,6 +216,5 @@ class TestParseArgs(unittest.TestCase):
 
 ###  Main  ###
 if __name__ == "__main__":
-    xit = run_main(_main, _usage)
-    sys.exit(xit)
+    sys.exit(run_main(_main, _usage))
 #####
