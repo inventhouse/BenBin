@@ -4,6 +4,7 @@
 # simple_cli: Copyright © 2025 Benjamin Holt - MIT License
 
 import re
+import sys
 from typing import Callable, Dict, List, Tuple
 import unittest
 from unittest.mock import Mock
@@ -11,15 +12,15 @@ from unittest.mock import Mock
 
 
 ###  Example  ###
-_USAGE = f"""
-Usage: {__file__} [options] [--] [args]
+_USAGE = """
+Usage: simple_cli.py [options] [--] [args]
 Options:
   -t, --test      Run tests
   -h, --help      Show this help message and exit
 
-Prints parsed arguments and options, also runs the test suite if -t or --test is given.
+Prints parsed arguments and options, also runs the test suite if -t or --test is given.  When running tests, arguments are passed on to the test runner; to pass options to the runner, use the -- separator (e.g. '-t -- -h' for test runner help).
 
-This is intended as a self-hosted example of the `parse_args` command-line argument parser in this module, not as a useful program.
+This is intended as a self-hosted example of simple_cli, not as a useful program.
 """
 
 def _usage():
@@ -31,20 +32,20 @@ def _main(*args, **opts):
     print(f"{opts = }")
     if opts.get("test", opts.get("t", False)):
         print("Running tests...")
-        unittest.main()  # FIXME: this also tries to parse sys.argv and errors on -t
+        unittest.main(argv=args)
     return 0
 #####
 
 
 ###  Run Main  ###
-OptionValue = str | bool | int | float
+OptionValue = bool | str | int | float  # TODO: add numeric value parsing
 ArgsOpts = Tuple[List[str], Dict[str, OptionValue]]
-ExitCode = None | int | str
+ExitCode = None | int | str  # sys.exit accepts these
 
 def run_main(
-        arg_list: List[str],
         main: Callable[..., ExitCode],
-        usage: Callable[[], ExitCode] | None = None
+        usage: Callable[[], ExitCode] | None = None,
+        arg_list: List[str] | None = None,
     ) -> ExitCode:
     """
     Parse command-line arguments and options with parse_args, then call a main function with the results; given a usage function, if -h or --help is given, call that instead.
@@ -54,14 +55,13 @@ def run_main(
         return usage()
     return main(*args, **opts)
 
-def parse_args(arg_list: List[str]) -> ArgsOpts:
+def parse_args(arg_list: List[str] | None = None) -> ArgsOpts:
     """
     A simple parser that translates command-line arguments and options into a Python list and dict suitable for *args and **kwargs.
 
     Features:
-    - Parses options and arguments from a list of strings with no setup needed
-    - Calls a main function, if given, and returns the exit value
-    - Automatically recognizes -h / --help when given a usage function
+    - Parses options and arguments from sys.argv or a list of strings with no setup needed
+    - Preserves program name as the first argument
     - Short and long boolean flags (-f / --foo)
     - Combined short flags (-abc == -a -b -c)
     - Negative flags (--foo / --no-foo)
@@ -73,10 +73,16 @@ def parse_args(arg_list: List[str]) -> ArgsOpts:
     - Does not automatically map short options to long options; use a pattern like opts.get("foo", opts.get("f", False))
     - Does not support options with multiple values like --foo=bar,baz (though "bar,baz" would come through and could be split)
     """
-    args: List[str] = []
+    # FIXME: Add support for numeric values
+    if arg_list is None:
+        arg_list = sys.argv
+    if not arg_list:
+        raise ValueError("Argument list is empty; must include at least program name")
+
+    args: List[str] = list(arg_list[:1])  # Start with program name
     options: Dict[str, OptionValue] = {}
     args_only = False
-    for arg in arg_list:
+    for arg in arg_list[1:]:
         if args_only:
             args.append(arg)
             continue
@@ -120,7 +126,7 @@ class TestRunMain(unittest.TestCase):
         main = Mock(return_value="main")
         usage = Mock(return_value="usage")
 
-        r = run_main(("-h",), main, usage=usage)
+        r = run_main(main, usage, ("ProgName", "-h",))
         main.assert_not_called()
         usage.assert_called_once()
         self.assertEqual(r, "usage", "Should return usage return value")
@@ -128,90 +134,88 @@ class TestRunMain(unittest.TestCase):
         main.reset_mock()
         usage.reset_mock()
 
-        run_main(("--help",), main, usage=usage)
+        run_main(main, usage, ("ProgName", "--help",))
         main.assert_not_called()
         usage.assert_called_once()
 
         main.reset_mock()
         usage.reset_mock()
 
-        r = run_main(("-h",), main, usage=None)
-        main.assert_called_once_with(h=True)
+        r = run_main(main, None, ("ProgName", "-h",))
+        main.assert_called_once_with("ProgName", h=True)
         usage.assert_not_called()
         self.assertEqual(r, "main", "Should return main return value")
 
 class TestParseArgs(unittest.TestCase):
     def test_options(self):
-        args, opts = parse_args(("-f", "--bar=baz"))
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "-f", "--bar=baz"))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"f": True, "bar": "baz"})
 
     def test_muli_word_options(self):
-        args, opts = parse_args(("--stuff-thing", "--foo-bar=baz",))
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "--stuff-thing", "--foo-bar=baz",))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"stuff-thing": True, "foo-bar": "baz"})
 
     def test_args(self):
-        args, opts = parse_args(("arg1", "arg2"))
-        self.assertEqual(args, ["arg1", "arg2"])
+        args, opts = parse_args(("ProgName", "arg1", "arg2"))
+        self.assertEqual(args, ["ProgName", "arg1", "arg2"])
         self.assertEqual(opts, {})
 
     def test_args_options(self):
-        args, opts = parse_args(("-f", "--bar=baz", "arg1", "arg2"))
-        self.assertEqual(args, ["arg1", "arg2"])
+        args, opts = parse_args(("ProgName", "-f", "--bar=baz", "arg1", "arg2"))
+        self.assertEqual(args, ["ProgName", "arg1", "arg2"])
         self.assertEqual(opts, {"f": True, "bar": "baz"})
 
     def test_combined(self):
-        args, opts = parse_args(["-abc"])
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "-abc"))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"a": True, "b": True, "c": True})
 
     def test_negative(self):
-        args, opts = parse_args(["--no-foo"])
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "--no-foo"))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"foo": False})
 
     def test_value(self):
-        args, opts = parse_args(["--foo=bar"])
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "--foo=bar"))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"foo": "bar"})
 
     def test_short_value(self):
-        args, opts = parse_args(["-f=bar"])
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "-f=bar"))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"f": "bar"})
 
     def test_short_combined_value(self):
-        args, opts = parse_args(["-abc=bar"])
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "-abc=bar"))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"a": True, "b": True, "c": "bar"})
 
     def test_combined_short_last_wins(self):
-        args, opts = parse_args(["-cc=bar"])
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "-cc=bar"))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"c": "bar"})
 
     def test_options_separator(self):
-        args, opts = parse_args(["-a", "--", "-f"])
-        self.assertEqual(args, ["-f"])
+        args, opts = parse_args(("ProgName", "-a", "--", "-f"))
+        self.assertEqual(args, ["ProgName", "-f"])
         self.assertEqual(opts, {"a": True})
 
     def test_weird_characters(self):
-        args, opts = parse_args(("-?", "-b*", "-a%=wut", "--bar$=baz?", "arg1?"))
-        self.assertEqual(args, ["arg1?"])
+        args, opts = parse_args(("ProgName", "-?", "-b*", "-a%=wut", "--bar$=baz?", "arg1?"))
+        self.assertEqual(args, ["ProgName", "arg1?"])
         self.assertEqual(opts, {"?": True, "b":True, "*": True, "a": True, "%": "wut", "bar$":"baz?"})
 
     def test_dash_value(self):
-        args, opts = parse_args(("-i=-", "--input=-", "--foo=-bar-",))
-        self.assertEqual(args, [])
+        args, opts = parse_args(("ProgName", "-i=-", "--input=-", "--foo=-bar-",))
+        self.assertEqual(args, ["ProgName"])
         self.assertEqual(opts, {"i": "-", "input": "-", "foo": "-bar-"})
 #####
 
 
 ###  Main  ###
 if __name__ == "__main__":
-    # import sys
-    # xit = run_main(sys.argv[1:], _main, _usage)
-    # sys.exit(xit)
-    unittest.main()
+    xit = run_main(_main, _usage)
+    sys.exit(xit)
 #####
