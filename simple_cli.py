@@ -4,8 +4,8 @@
 # simple_cli: Copyright © 2025 Benjamin Holt - MIT License
 
 import re
-import unittest
 from typing import Any, Callable, List, Optional, Union
+import unittest
 from unittest.mock import Mock
 
 ExitCode = Union[None, int, str]
@@ -76,6 +76,7 @@ def run_main(
                 if "=" in arg:
                     k, _, v = arg.partition("=")
                 else:
+                    # no- --> False
                     v = not arg.startswith("no-")
                     k = arg.removeprefix("no-")
                 options[k] = v
@@ -88,6 +89,7 @@ def run_main(
                     arg, last_opt = opts[:-1], opts[-1]
                 options.update({k: True for k in arg})
                 if last_opt:
+                    # Must process in-order
                     options[last_opt] = val
             ## Anything else is an argument
             case _:
@@ -100,13 +102,13 @@ def run_main(
 ###  Tests  ###
 class TestRunMain(unittest.TestCase):
     def test_usage(self):
-        main = Mock()
-        usage = Mock(return_value=0)
+        main = Mock(return_value="main")
+        usage = Mock(return_value="usage")
 
         r = run_main(main, ("-h",), usage=usage)
         main.assert_not_called()
         usage.assert_called_once()
-        self.assertEqual(r, 0, "Should return usage return value")
+        self.assertEqual(r, "usage", "Should return usage return value")
 
         main.reset_mock()
         usage.reset_mock()
@@ -118,15 +120,15 @@ class TestRunMain(unittest.TestCase):
         main.reset_mock()
         usage.reset_mock()
 
-        run_main(main, ("-h",), usage=None)
+        r = run_main(main, ("-h",), usage=None)
         main.assert_called_once_with(h=True)
         usage.assert_not_called()
+        self.assertEqual(r, "main", "Should return main return value")
 
     def test_options(self):
-        main = Mock(return_value=0)
+        main = Mock()
         r = run_main(main, ("-f", "--bar=baz"))
         main.assert_called_once_with(f=True, bar="baz")
-        self.assertEqual(r, 0, "Should return main return value")
 
     def test_muli_word_options(self):
         main = Mock()
