@@ -28,6 +28,7 @@ def _usage():
     return 0
 
 def _main(*args, **opts):
+    print("===  Simple CLI  ===")
     print(f"{args = }")
     print(f"{opts = }")
     if opts.get("test", opts.get("t", False)):
@@ -38,9 +39,9 @@ def _main(*args, **opts):
 
 
 ###  Run Main  ###
-OptionValue = bool | str | int | float  # TODO: add numeric value parsing
+OptionValue = bool | str
 ArgsOpts = Tuple[List[str], Dict[str, OptionValue]]
-ExitCode = None | int | str  # sys.exit accepts these
+ExitCode = int | str | None  # sys.exit accepts these
 
 def run_main(
         main: Callable[..., ExitCode],
@@ -73,7 +74,6 @@ def parse_args(arg_list: List[str] | None = None) -> ArgsOpts:
     - Does not automatically map short options to long options; use a pattern like opts.get("foo", opts.get("f", False))
     - Does not support options with multiple values like --foo=bar,baz (though "bar,baz" would come through and could be split)
     """
-    # FIXME: Add support for numeric values
     if arg_list is None:
         arg_list = sys.argv
     if not arg_list:
