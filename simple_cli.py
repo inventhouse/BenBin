@@ -23,7 +23,7 @@ Prints parsed arguments and options, also runs the test suite if -t or --test is
 This is intended as a self-hosted example of simple_cli, not as a useful program.
 """
 
-def _usage():
+def _usage(*args, **opts):
     print(_USAGE)
     return 0
 
@@ -39,22 +39,26 @@ def _main(*args, **opts):
 
 
 ###  Run Main  ###
-OptionValue = bool | str
-ArgsOpts = Tuple[List[str], Dict[str, OptionValue]]
 ExitCode = int | str | None  # sys.exit accepts these
 
 def run_main(
         main: Callable[..., ExitCode],
-        usage: Callable[[], ExitCode] | None = None,
+        usage: Callable[..., ExitCode] | None = None,
         arg_list: List[str] | None = None,
     ) -> ExitCode:
     """
-    Parse command-line arguments and options with parse_args, then call a main function with the results; given a usage function, if -h or --help is given, call that instead.
+    Parse command-line arguments and options with parse_args, then call a main function with the results; given a usage function, if -h or --help is set, call that instead.
     """
     args, opts = parse_args(arg_list)
     if usage and opts.get("help", opts.get("h", False)):
-        return usage()
+        return usage(*args, **opts)
     return main(*args, **opts)
+#####
+
+
+###  Parse Args  ###
+OptionValue = bool | str
+ArgsOpts = Tuple[List[str], Dict[str, OptionValue]]
 
 def parse_args(arg_list: List[str] | None = None) -> ArgsOpts:
     """
@@ -79,7 +83,7 @@ def parse_args(arg_list: List[str] | None = None) -> ArgsOpts:
     if not arg_list:
         raise ValueError("Argument list is empty; must include at least program name")
 
-    args: List[str] = list(arg_list[:1])  # Start with program name
+    args: List[str] = [arg_list[0]]  # Start with program name
     options: Dict[str, OptionValue] = {}
     args_only = False
     for arg in arg_list[1:]:
@@ -128,7 +132,7 @@ class TestRunMain(unittest.TestCase):
 
         r = run_main(main, usage, ("ProgName", "-h",))
         main.assert_not_called()
-        usage.assert_called_once()
+        usage.assert_called_once_with("ProgName", h=True)
         self.assertEqual(r, "usage", "Should return usage return value")
 
         main.reset_mock()
@@ -136,7 +140,7 @@ class TestRunMain(unittest.TestCase):
 
         run_main(main, usage, ("ProgName", "--help",))
         main.assert_not_called()
-        usage.assert_called_once()
+        usage.assert_called_once_with("ProgName", help=True)
 
         main.reset_mock()
         usage.reset_mock()
