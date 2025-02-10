@@ -71,6 +71,7 @@ def parse_args(arg_list: List[str] | None = None) -> ArgsOpts:
     - Combined short flags (-abc == -a -b -c)
     - Negative flags (--foo / --no-foo)
     - Options with values (-f=bar / --foo=bar)
+    - Long options are converted to snake_case (--foo-bar --> "foo_bar")
     - Items after arguments separator (--) are treated as arguments, not options
 
     Limitations:
@@ -105,6 +106,7 @@ def parse_args(arg_list: List[str] | None = None) -> ArgsOpts:
                     # no- --> False
                     v = not arg.startswith("no-")
                     k = arg.removeprefix("no-")
+                k = k.replace("-", "_")
                 options[k] = v
             ## Short options
             case _ if re.match(r"-[^-]", arg):
@@ -159,7 +161,7 @@ class TestParseArgs(unittest.TestCase):
     def test_muli_word_options(self):
         args, opts = parse_args(("ProgName", "--stuff-thing", "--foo-bar=baz",))
         self.assertEqual(args, ["ProgName"])
-        self.assertEqual(opts, {"stuff-thing": True, "foo-bar": "baz"})
+        self.assertEqual(opts, {"stuff_thing": True, "foo_bar": "baz"})
 
     def test_args(self):
         args, opts = parse_args(("ProgName", "arg1", "arg2"))
