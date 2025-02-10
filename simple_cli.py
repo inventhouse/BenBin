@@ -127,7 +127,7 @@ def parse_args(arg_list: List[str] | None = None) -> ArgsOpts:
 
 
 ###  Tests  ###
-class TestRunMain(unittest.TestCase):
+class RunMainTestCase(unittest.TestCase):
     def test_usage(self):
         main = Mock(return_value="main")
         usage = Mock(return_value="usage")
@@ -152,7 +152,7 @@ class TestRunMain(unittest.TestCase):
         usage.assert_not_called()
         self.assertEqual(r, "main", "Should return main return value")
 
-class TestParseArgs(unittest.TestCase):
+class ParseArgsTestCase(unittest.TestCase):
     def test_options(self):
         args, opts = parse_args(("ProgName", "-f", "--bar=baz"))
         self.assertEqual(args, ["ProgName"])
