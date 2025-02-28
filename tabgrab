@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2022-2024 Benjamin Holt -- MIT License
+# Copyright (c) 2022-2025 Benjamin Holt -- MIT License
 
 set -eo pipefail
 # set -x  # Uncomment for debugging
@@ -9,6 +9,7 @@ if [ "$1" == "-h" -o "$1" == "--help" ]; then
 usage: tabgrab [-h|--help] [-c|--copy] [BROWSER]
        Collect tabs from all windows as a markdown list of links with
        the first tab of each window as the parent of the remaining tabs.
+       The current tab is marked with ☆ and minimized windows with ▽.
        BROWSER defaults to the BROWSER_APP environment variable, otherwise
        the default handler for 'https' is used to guess the system browser.
 
@@ -38,6 +39,10 @@ for arg in $@; do
     esac
 done
 
+# AppleScript Localizations
+Minimized="miniaturized"
+CurrentTab="current tab"
+
 Browser="${1:-${BROWSER_APP}}"
 if [ -z "$Browser" ]; then
     Handler=`defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | (grep -B1 "LSHandlerURLScheme = https" || echo -n "") | head -1 | cut -d '"' -f 2`
@@ -45,6 +50,8 @@ if [ -z "$Browser" ]; then
         Browser="Safari"
     elif [ "$Handler" == "com.google.chrome" ]; then
         Browser="Chrome"
+        Minimized="minimized"
+        CurrentTab="active tab"
     else
         # Try the last token of the the handler, this would work for Safari and Chrome, but doesn't work with Firefox which doesn't offer tabs in its scripting dictionary :shrug:
         Browser=`echo "$Handler" | tr '.' '\n' | tail -1`
@@ -62,17 +69,31 @@ tell application "$Browser"
     set tabList to ""
     set windowCount to $NumWindows
     repeat with w from 1 to windowCount
-        set tabCount to number of tabs in window w
+        set _window to window w
+        set minMark to ""
+        if _window is $Minimized then
+            set minMark to "▽ "
+        end if
+        set tabCount to number of tabs in _window
         repeat with t from 1 to tabCount
-            if t > 1 then
-                set tabList to tabList & "    "
+            set _tab to tab t of _window
+            set currentTab to $CurrentTab of _window
+            set currentMark to ""
+            if _tab is currentTab then
+                set currentMark to " ☆"
             end if
-            set tabName to name of tab t of window w
-            set tabURL to URL of tab t of window w as string
+            set indent to ""
+            if t > 1 then
+                set indent to "    "
+                set minMark to ""  -- Don't add the minimized mark for child tabs
+            end if
+            set tabName to name of _tab
+            set tabURL to URL of _tab as string
             if tabName is "" then
                 set tabName to tabURL
             end if
-            set tabList to tabList & "- [" & tabName & "](" & tabURL & ")" & linefeed as string
+            set tabLink to "[" & tabName & "](" & tabURL & ")"
+            set tabList to tabList & indent & "- " & minMark & tabLink & currentMark & linefeed as string
         end repeat
         set tabList to tabList & linefeed
     end repeat
