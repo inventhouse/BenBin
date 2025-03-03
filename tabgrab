@@ -74,10 +74,10 @@ tell application "$Browser"
         if _window is $Minimized then
             set minMark to "▽ "
         end if
+        set currentTab to $CurrentTab of _window
         set tabCount to number of tabs in _window
         repeat with t from 1 to tabCount
             set _tab to tab t of _window
-            set currentTab to $CurrentTab of _window
             set currentMark to ""
             if _tab is currentTab then
                 set currentMark to " ☆"
