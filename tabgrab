@@ -55,7 +55,7 @@ if [ -z "$Browser" ]; then
     else
         # Try the last token of the the handler, this would work for Safari and Chrome, but doesn't work with Firefox which doesn't offer tabs in its scripting dictionary :shrug:
         Browser=`echo "$Handler" | tr '.' '\n' | tail -1`
-        echo "Guessing $Browser (it may not work)"
+        echo "Guessing $Browser (it may not work)" >&2
     fi
     Bold=`tput bold`
     Off=`tput sgr0`
