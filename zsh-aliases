@@ -1,0 +1,28 @@
+#!/bin/zsh
+###  Basic Aliases  ###
+alias ag='allgit'
+if [[ -n `which allgit_dev` ]]; then  # Special symlink to keep uing the dev version
+    alias ag='allgit_dev'
+fi
+
+alias dkc='docker-compose'
+alias tf='terraform'
+#####
+
+
+###  Pasteboard Aliases  ###
+alias pbq='pbpaste | sed -e "s/^/> /" | pbcopy'  # pb quote
+alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'  # pb comments
+
+alias pbdotpath='pbpaste | sed -e "s/\\.[^.]*$//" | tr "/" "." | pbcopy'
+
+alias pblower='pbpaste | tr 'A-Z' 'a-z' | pbcopy'
+alias pbupper='pbpaste | tr 'a-z' 'A-Z' | pbcopy'
+
+alias pbsort='pbpaste | sort | pbcopy'
+alias pbwrap='pbpaste | fmt -72 | pbcopy'
+alias pbwc='pbpaste | wc'
+
+alias pbxml='pbpaste | xmllint --format - | pbcopy'
+alias pbjson='pbpaste | jq . | pbcopy'
+#####
