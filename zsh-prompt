@@ -1,7 +1,9 @@
 #!/bin/zsh
 
+# TODO: more configurability (e.g. colors, max length of pwd, etc.)
+
 ###  Prompt Helpers  ###
-parse_git_branch() {
+branch_name() {
     # Check if we are in a git repository (avoiding errors outside repos)
     git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return
 
@@ -25,7 +27,7 @@ parse_git_branch() {
     echo " ${dirty_color}${branch}%{%f%}"
 }
 
-get_virtualenv_name() {
+venv_name() {
     if [[ -n "$VIRTUAL_ENV" ]]; then
         # Add a leading space before the virtual env name
         echo " ($(basename "$VIRTUAL_ENV"))"
@@ -35,7 +37,7 @@ get_virtualenv_name() {
     fi
 }
 
-shorten_pwd() {
+short_pwd() {
     local max_width=$1
     local pwd_path=$(print -P "%~")  # Use %~ to get the path with ~ abbreviation
     local path_length=${#pwd_path}
@@ -56,14 +58,16 @@ shorten_pwd() {
 ###  Prompt Function  ###
 # Left-prompt is constant char+space to maximize space and eliminate start-of-line noise; all info goes in the right-prompt
 # Right-prompt starts with constant char to allow relatively easy parsing/trimming of copied terminal lines
+# Both prompts are color-coded based on success/failure of last command
+# The full right-prompt is:
+#   ● [exit code] (venv) branch ~/current/directory
 set_prompt() {
-    local venv_name=$(get_virtualenv_name)
-    local git_branch=$(parse_git_branch)
-
     PS1="%{%F{%(?.blue.red)}%}▶︎ %{%f%}"
-    RPROMPT="%{%F{%(?.blue.red)}%}●%(?.. %?)%{%f%}$(get_virtualenv_name)$(parse_git_branch)%{%F{blue}%} $(shorten_pwd 30)%{%f%}"
+    RPROMPT="%{%F{%(?.blue.red)}%}●%(?.. [%?])%{%f%}$(venv_name)$(branch_name) %{%F{blue}%}$(short_pwd 30)%{%f%}"
 }
-PS2="%{%F{blue}%}… %{%f%}"
+PS2="%{%F{blue}%}… %{%f%}"  # Continuation
+PS3="%{%F{blue}%}? %{%f%}"  # Select
+PS4="%{%F{blue}%}▷ %{%f%}"  # Debug
 
 typeset -ga precmd_functions
 precmd_functions+=(set_prompt)  # Keep prompt updated
