@@ -63,6 +63,7 @@ set_prompt() {
     PS1="%{%F{%(?.blue.red)}%}▶︎ %{%f%}"
     RPROMPT="%{%F{%(?.blue.red)}%}●%(?.. %?)%{%f%}$(get_virtualenv_name)$(parse_git_branch)%{%F{blue}%} $(shorten_pwd 30)%{%f%}"
 }
+PS2="%{%F{blue}%}… %{%f%}"
 
 typeset -ga precmd_functions
 precmd_functions+=(set_prompt)  # Keep prompt updated
