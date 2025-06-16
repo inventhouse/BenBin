@@ -5,6 +5,7 @@ if [[ -n `which allgit_dev` ]]; then  # Special symlink to keep uing the dev ver
     alias ag='allgit_dev'
 fi
 
+alias venv='python3 -m venv'
 alias dkc='docker-compose'
 alias tf='terraform'
 #####
