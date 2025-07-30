@@ -26,4 +26,10 @@ alias pbwc='pbpaste | wc'
 
 alias pbxml='pbpaste | xmllint --format - | pbcopy'
 alias pbjson='pbpaste | jq . | pbcopy'
+pbsql() {
+    pbpaste | sqlfluff fix --dialect postgres - | pbcopy
+    if ! pbpaste | sqlfluff lint --dialect postgres -; then
+        pbpaste | cat -n
+    fi
+}
 #####
