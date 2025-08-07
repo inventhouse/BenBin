@@ -27,8 +27,11 @@ alias pbwc='pbpaste | wc'
 alias pbxml='pbpaste | xmllint --format - | pbcopy'
 alias pbjson='pbpaste | jq . | pbcopy'
 pbsql() {
+    # Fix what can be fixed easily...
     pbpaste | sqlfluff fix --dialect postgres - | pbcopy
+    # ...if there are still issues, lint will print line numbers...
     if ! pbpaste | sqlfluff lint --dialect postgres -; then
+        # ...in that case also print numbered lines
         pbpaste | cat -n
     fi
 }
