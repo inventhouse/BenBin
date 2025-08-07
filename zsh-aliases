@@ -13,9 +13,10 @@ alias tf='terraform'
 
 ###  Pasteboard Aliases  ###
 alias pbq='pbpaste | sed -e "s/^/> /" | pbcopy'  # pb quote
-alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'  # pb comments
+alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'  # pb strip comments
 
-alias pbdotpath='pbpaste | sed -e "s/\\.[^.]*$//" | tr "/" "." | pbcopy'
+# Convert e.g. module/sub/file.py to module.sub.file
+`alias pbdotpath='pbpaste | sed -e "s/\\.[^.]*$//" | tr "/" "." | pbcopy'
 
 alias pblower='pbpaste | tr 'A-Z' 'a-z' | pbcopy'
 alias pbupper='pbpaste | tr 'a-z' 'A-Z' | pbcopy'
