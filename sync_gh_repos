@@ -1,0 +1,103 @@
+#!/bin/bash
+# Copyright (c) 2022-2025 Benjamin Holt -- MIT License
+
+set -eo pipefail
+# set -x  # Uncomment for debugging
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: sync_gh_repos [-h|--help] <organization_name>
+    Sync GitHub repositories for a given organization; requires GitHub CLI (gh).
+    Clones repositories that don't exist locally and pulls updates for those that do.
+
+        -h, --help    Print this message and exit
+USAGE
+    exit 0
+fi
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <organization_name>"
+    exit 1
+fi
+
+ORG_NAME="$1"
+CURRENT_DIR=$(pwd)
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}Syncing repositories for organization: ${ORG_NAME}${NC}"
+echo -e "${BLUE}Working directory: ${CURRENT_DIR}${NC}"
+echo
+
+# Check if gh CLI is installed
+if ! command -v gh &> /dev/null; then
+    echo -e "${RED}Error: GitHub CLI (gh) is not installed or not in PATH${NC}"
+    echo "Please install it from https://cli.github.com/"
+    exit 1
+fi
+
+# Check if user is authenticated
+if ! gh auth status &> /dev/null; then
+    echo -e "${RED}Error: Not authenticated with GitHub CLI${NC}"
+    echo "Please run 'gh auth login' first"
+    exit 1
+fi
+
+echo -e "${YELLOW}Fetching repository list from GitHub...${NC}"
+
+# Get all repositories for the organization
+REPOS=$(gh repo list "$ORG_NAME" --limit 1000 --json name,sshUrl --jq '.[] | "\(.name)|\(.sshUrl)"')
+
+if [ -z "$REPOS" ]; then
+    echo -e "${RED}No repositories found for organization: ${ORG_NAME}${NC}"
+    echo "Please check the organization name and your access permissions"
+    exit 1
+fi
+
+echo -e "${GREEN}Found $(echo "$REPOS" | wc -l) repositories${NC}"
+echo
+
+# Process each repository
+while IFS='|' read -r repo_name ssh_url; do
+    echo -e "${BLUE}Processing: ${repo_name}${NC}"
+    
+    if [ -d "$repo_name" ]; then
+        # Repository exists locally - update it
+        echo -e "  🪄 ${YELLOW}Repository exists locally, updating...${NC}"
+        cd "$repo_name"
+        
+        # Check if it's actually a git repository
+        if [ ! -d ".git" ]; then
+            echo -e "${RED}  Warning: ${repo_name} exists but is not a git repository${NC}"
+            cd "$CURRENT_DIR"
+            continue
+        fi
+        
+        # Fetch and pull latest changes
+        if git fetch origin && git pull -r origin "$(git symbolic-ref --short HEAD)" 2>/dev/null; then
+            echo -e "${GREEN}  ✓ Updated successfully${NC}"
+        else
+            echo -e "${YELLOW}  Warning: Could not update ${repo_name}${NC}"
+        fi
+        
+        cd "$CURRENT_DIR"
+    else
+        # Repository doesn't exist locally - clone it
+        echo -e "  🆕 ${YELLOW}Repository not found locally, cloning...${NC}"
+        
+        if git clone "$ssh_url" "$repo_name"; then
+            echo -e "${GREEN}  ✓ Cloned successfully${NC}"
+        else
+            echo -e "${RED}  ✗ Failed to clone ${repo_name}${NC}"
+        fi
+    fi
+    
+    echo
+done <<< "$REPOS"
+
+echo -e "${GREEN}Repository sync completed!${NC}"
