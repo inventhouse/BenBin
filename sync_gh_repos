@@ -50,8 +50,60 @@ fi
 
 echo -e "${YELLOW}Fetching repository list from GitHub...${NC}"
 
-# Get all repositories for the organization
-REPOS=$(gh repo list "$ORG_NAME" --limit 1000 --json name,sshUrl --jq '.[] | "\(.name)|\(.sshUrl)"')
+# Function to fetch repositories with pagination and rate limiting
+fetch_repos_paginated() {
+    local org="$1"
+    local page=1
+    local per_page=100
+    local all_repos=""
+
+    while true; do
+        echo -e "${YELLOW}  Fetching page $page (up to $per_page repos)...${NC}"
+
+        # Fetch repos for this page with retry logic
+        local page_repos
+        local retry_count=0
+        local max_retries=3
+
+        while [ $retry_count -lt $max_retries ]; do
+            if page_repos=$(gh repo list "$org" --limit $per_page --json name,sshUrl --jq '.[] | "\(.name)|\(.sshUrl)"' 2>/dev/null); then
+                break
+            else
+                retry_count=$((retry_count + 1))
+                if [ $retry_count -lt $max_retries ]; then
+                    echo -e "${YELLOW}  API call failed, retrying in $((retry_count * 2)) seconds... (attempt $retry_count/$max_retries)${NC}"
+                    sleep $((retry_count * 2))
+                else
+                    echo -e "${RED}  Failed to fetch repositories after $max_retries attempts${NC}"
+                    return 1
+                fi
+            fi
+        done
+
+        if [ -z "$page_repos" ]; then
+            break
+        fi
+
+        all_repos="$all_repos$page_repos"$'\n'
+
+        # Check if we got fewer repos than requested (last page)
+        local repo_count=$(echo "$page_repos" | wc -l)
+        if [ "$repo_count" -lt $per_page ]; then
+            break
+        fi
+
+        page=$((page + 1))
+
+        # Rate limiting: sleep between API calls
+        echo -e "${YELLOW}  Sleeping 2 seconds to respect rate limits...${NC}"
+        sleep 2
+    done
+
+    echo "$all_repos"
+}
+
+# Get all repositories for the organization with pagination
+REPOS=$(fetch_repos_paginated "$ORG_NAME")
 
 if [ -z "$REPOS" ]; then
     echo -e "${RED}No repositories found for organization: ${ORG_NAME}${NC}"
@@ -59,7 +111,7 @@ if [ -z "$REPOS" ]; then
     exit 1
 fi
 
-echo -e "${GREEN}Found $(echo "$REPOS" | wc -l) repositories${NC}"
+echo -e "${GREEN}Found $(echo "$REPOS" | grep -c '|') repositories${NC}"
 echo
 
 # Process each repository
@@ -96,7 +148,10 @@ while IFS='|' read -r repo_name ssh_url; do
             echo -e "${RED}  ✗ Failed to clone ${repo_name}${NC}"
         fi
     fi
-    
+
+    # Brief pause between repositories to be gentle on the system
+    sleep 0.5
+
     echo
 done <<< "$REPOS"
 
