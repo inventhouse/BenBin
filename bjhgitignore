@@ -1,0 +1,9 @@
+# Extra ignores for my workflows
+# git config [--local|--global] core.excludesFile ~/inventhub/BenBin/bjhgitignore
+
+# bjh conventions
+NOCOMMIT
+
+# ClaudeCode
+CLAUDE.md
+**/.claude/settings.local.json
