@@ -3,6 +3,7 @@
 
 # bjh conventions
 NOCOMMIT
+.pants.rc
 
 # ClaudeCode
 CLAUDE.md
