@@ -12,6 +12,13 @@ alias tf='terraform'
 
 
 ###  Pasteboard Aliases  ###
+# Linux: replace pbcopy and pbpaste
+# Requires `sudo apt install wl-clipboard`
+if [ ! `which pbcopy 2>&1 >> /dev/null` ]; then
+    alias pbcopy='wl-copy'
+    alias pbpaste='wl-paste'
+fi
+
 alias pbq='pbpaste | sed -e "s/^/> /" | pbcopy'  # pb quote
 alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'  # pb strip comments
 
