@@ -116,34 +116,17 @@ echo
 
 # Process each repository
 while IFS='|' read -r repo_name ssh_url; do
-    echo -e "${BLUE}Processing: ${repo_name}${NC}"
+    echo -e "${BLUE}${repo_name}${NC}"
     
     if [ -d "$repo_name" ]; then
-        # Repository exists locally - update it
-        echo -e "  🪄 ${YELLOW}Repository exists locally, updating...${NC}"
-        cd "$repo_name"
-        
-        # Check if it's actually a git repository
-        if [ ! -d ".git" ]; then
-            echo -e "${RED}  Warning: ${repo_name} exists but is not a git repository${NC}"
-            cd "$CURRENT_DIR"
-            continue
-        fi
-        
-        # Fetch and pull latest changes
-        if git fetch origin && git pull -r origin "$(git symbolic-ref --short HEAD)" 2>/dev/null; then
-            echo -e "${GREEN}  ✓ Updated successfully${NC}"
-        else
-            echo -e "${YELLOW}  Warning: Could not update ${repo_name}${NC}"
-        fi
-        
-        cd "$CURRENT_DIR"
+        # Repository exists locally - skip it
+        echo -e "  ✅ ${YELLOW}Exists, skipping${NC}"
     else
         # Repository doesn't exist locally - clone it
-        echo -e "  🆕 ${YELLOW}Repository not found locally, cloning...${NC}"
+        echo -e "  🆕 ${YELLOW}Cloning...${NC}"
         
         if git clone "$ssh_url" "$repo_name"; then
-            echo -e "${GREEN}  ✓ Cloned successfully${NC}"
+            echo -e "${GREEN}  ✓ Cloned${NC}"
         else
             echo -e "${RED}  ✗ Failed to clone ${repo_name}${NC}"
         fi
