@@ -9,6 +9,11 @@ export PATH="$PATH:/Users/bjh/.local/bin"
 # pyenv setup
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
+
+# Homebrew
+if `which brew 2>&1 >> /dev/null`; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
 #####
 
 
