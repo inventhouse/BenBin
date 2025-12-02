@@ -1,10 +1,7 @@
 #!/bin/zsh
 
 ###  Environment Variables  ###
-export PATH="$HOME/.pyenv/bin:${PATH}:$HOME/inventhub/allgit:$HOME/inventhub/bettergit:$HOME/inventhub/BenBin"
-
-# Added by `pipx`
-export PATH="$PATH:/Users/bjh/.local/bin"
+export PATH="$HOME/.pyenv/bin:${PATH}:$HOME/inventhub/allgit:$HOME/inventhub/bettergit:$HOME/inventhub/BenBin:$HOME/.local/bin"
 
 # pyenv setup
 eval "$(pyenv init --path)"
