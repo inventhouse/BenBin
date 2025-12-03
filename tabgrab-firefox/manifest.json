@@ -3,6 +3,14 @@
   "name": "TabGrab",
   "version": "1.0.0",
   "description": "Collect tabs from all windows as a markdown list of links",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tabgrab@benbin.inventhouse",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "permissions": [
     "tabs",
     "clipboardWrite"

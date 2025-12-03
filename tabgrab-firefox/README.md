@@ -23,18 +23,44 @@ This is the Firefox/Linux equivalent of the macOS `tabgrab` script.
 3. Navigate to this directory and select `manifest.json`
 4. The extension will be loaded until you restart Firefox
 
-### Permanent Installation (Unsigned)
+### Permanent Installation (Signed)
 
-Firefox requires extensions to be signed by Mozilla for permanent installation. For personal use:
+Firefox requires extensions to be signed by Mozilla. For personal use, use self-distribution:
 
-1. Open Firefox and navigate to `about:config`
-2. Search for `xpinstall.signatures.required`
-3. Set it to `false` (Note: This disables signature verification for all extensions)
-4. Package the extension: `cd tabgrab-firefox && zip -r ../tabgrab-firefox.xpi *`
-5. Open `about:addons` and click the gear icon
-6. Select "Install Add-on From File..." and choose the `.xpi` file
+1. **Create Mozilla account**: Sign up at https://addons.mozilla.org/developers/
 
-Alternatively, use Firefox Developer Edition or Nightly which allow unsigned extensions more easily.
+2. **Package the extension**:
+   ```bash
+   cd tabgrab-firefox
+   zip -r -FS ../tabgrab-firefox.zip * --exclude '*.git*'
+   ```
+
+3. **Submit for signing**:
+   - Go to https://addons.mozilla.org/developers/addon/submit/distribution
+   - Choose "On your own" (self-distribution - not listed publicly on AMO)
+   - Upload `tabgrab-firefox.zip`
+   - Fill out basic metadata (name, description, category)
+   - Simple extensions are usually auto-approved within minutes
+
+4. **Download and install**:
+   - Once approved, download the signed `.xpi` file
+   - In Firefox, go to `about:addons`
+   - Click the gear icon → "Install Add-on From File..."
+   - Select the signed `.xpi` file
+
+#### Alternative: Using web-ext CLI
+
+1. **Generate API credentials**:
+   - Go to https://addons.mozilla.org/developers/addon/api/key/
+   - Generate an API key (JWT issuer and secret)
+
+```bash
+npm install -g web-ext
+cd tabgrab-firefox
+web-ext sign --api-key=YOUR_JWT_ISSUER --api-secret=YOUR_JWT_SECRET
+```
+
+The signed `.xpi` will be automatically downloaded to `web-ext-artifacts/` directory.
 
 ## Usage
 
