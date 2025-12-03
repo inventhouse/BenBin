@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "TabGrab",
+  "version": "1.0.0",
+  "description": "Collect tabs from all windows as a markdown list of links",
+  "permissions": [
+    "tabs",
+    "clipboardWrite"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "TabGrab - Collect all tabs",
+    "default_icon": {
+      "48": "icons/icon-48.png"
+    }
+  },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+G"
+      },
+      "description": "Grab tabs"
+    }
+  },
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  }
+}
