@@ -1,7 +1,7 @@
 #!/bin/zsh
 ###  Basic Aliases  ###
 alias ag='allgit'
-if [[ -n `which allgit.py` ]]; then  # Use the dev version if available
+if which allgit.py 2>&1 >> /dev/null; then  # Use the dev version if available
     alias ag='allgit.py'
 fi
 
