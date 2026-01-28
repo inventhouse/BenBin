@@ -1,8 +1,8 @@
 #!/bin/zsh
 ###  Basic Aliases  ###
 alias ag='allgit'
-if [[ -n `which allgit_dev` ]]; then  # Special symlink to keep using the dev version
-    alias ag='allgit_dev'
+if [[ -n `which allgit.py` ]]; then  # Use the dev version if available
+    alias ag='allgit.py'
 fi
 
 alias venv='python3 -m venv'
