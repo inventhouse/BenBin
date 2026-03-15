@@ -1,0 +1,57 @@
+#!/bin/bash
+# Copyright (c) 2026 Benjamin Holt -- MIT License
+
+set -eo pipefail
+# set -x  # Uncomment for debugging
+# DRY_RUN=echo
+if [ -n "$DRY_RUN" ]; then
+    echo "DRY RUN"
+fi
+
+if [ -z "$1" -o "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: gh_migrate DIR
+       Migrates git repos in DIR to GitHub as new private repos based on
+       their workarea name.
+
+       WARNING: This script has NOT been substantially hardened!
+
+       -h, --help    Print this message and exit
+USAGE
+    exit 0
+fi
+
+REPOS_DIR="$1"
+GITHUB_USER=$(gh api user --jq .login)
+
+for REPO_PATH in "$REPOS_DIR"/*/; do
+  REPO_NAME=$(basename "$REPO_PATH")
+  ORIGINAL_URL=$(git -C "$REPO_PATH" remote get-url origin)
+
+  if [ -d "$REPO_NAME" ]; then
+    echo "Skipping $REPO_NAME: directory already exists"
+    continue
+  fi
+
+  echo "Migrating $REPO_NAME from $ORIGINAL_URL..."
+
+  # Clone a fresh mirror from original
+  $DRY_RUN git clone --mirror "$ORIGINAL_URL" "$TMPDIR/$REPO_NAME.git"
+
+  # Create private repo on GitHub
+  $DRY_RUN gh repo create "$REPO_NAME" --private
+
+  # Push to GitHub
+  $DRY_RUN git -C "$TMPDIR/$REPO_NAME.git" remote set-url origin "git@github.com:$GITHUB_USER/$REPO_NAME.git"
+  $DRY_RUN git -C "$TMPDIR/$REPO_NAME.git" push --mirror
+
+  # Cleanup
+  $DRY_RUN rm -rf "$TMPDIR/$REPO_NAME.git"
+
+  # Clone migrated repo into current directory and add old remote
+  $DRY_RUN git clone "git@github.com:$GITHUB_USER/$REPO_NAME.git"
+  $DRY_RUN git -C "$REPO_NAME" remote add old-origin "$ORIGINAL_URL"
+
+  echo "Done: $REPO_NAME"
+  sleep 2  # Try to stay under rate limits FIXME: this doesn't work, stalls out after a couple repos
+done
