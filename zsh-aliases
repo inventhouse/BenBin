@@ -8,6 +8,8 @@ fi
 alias venv='python3 -m venv'
 alias dkc='docker-compose'
 alias tf='terraform'
+
+alias serve='python -m http.server -b 127.0.0.1'
 #####
 
 
