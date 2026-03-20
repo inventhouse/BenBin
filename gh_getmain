@@ -68,6 +68,7 @@ for REPO_PATH in */; do
   echo "Updating $(basename $REPO_PATH)..."
   retry git -C "$REPO_PATH" fetch origin || continue
   $DRY_RUN git -C "$REPO_PATH" checkout main
+  $DRY_RUN git -C "$REPO_PATH" branch --set-upstream-to=origin/main main
   $DRY_RUN git -C "$REPO_PATH" branch -d master
   $DRY_RUN git -C "$REPO_PATH" remote set-head origin main
 
