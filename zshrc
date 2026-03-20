@@ -1,7 +1,13 @@
 #!/bin/zsh
 
 ###  Environment Variables  ###
-export PATH="$HOME/.pyenv/bin:${PATH}:$HOME/inventhub/allgit:$HOME/inventhub/bettergit:$HOME/inventhub/BenBin:$HOME/.local/bin:$HOME/.cargo/bin"
+export PATH="$HOME/.pyenv/bin:${PATH}:$HOME/inventhub/allgit:$HOME/inventhub/bettergit:$HOME/inventhub/BenBin:$HOME/.local/bin"
+
+# Go lang
+export PATH="$PATH:$HOME/go/bin"
+
+# Rust
+export PATH="$PATH:$HOME/.cargo/bin"
 
 # pyenv setup
 eval "$(pyenv init --path)"
