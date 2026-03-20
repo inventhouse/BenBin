@@ -4,6 +4,22 @@
 set -eo pipefail
 # set -x  # Uncomment for debugging
 
+export GIT_SSH_COMMAND="ssh -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3"
+
+retry() {
+  local delay=5
+  for attempt in 1 2 3 4 5; do
+    if timeout 60 "$@"; then
+      return 0
+    fi
+    echo "  Command failed (attempt $attempt), retrying in ${delay}s..."
+    sleep $delay
+    delay=$((delay * 2))
+  done
+  echo "  ERROR: command failed after 5 attempts, skipping"
+  return 1
+}
+
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
 usage: sync_gh_repos [-h|--help] <organization_name>
@@ -62,23 +78,10 @@ fetch_repos_paginated() {
 
         # Fetch repos for this page with retry logic
         local page_repos
-        local retry_count=0
-        local max_retries=3
-
-        while [ $retry_count -lt $max_retries ]; do
-            if page_repos=$(gh repo list "$org" --limit $per_page --json name,sshUrl --jq '.[] | "\(.name)|\(.sshUrl)"' 2>/dev/null); then
-                break
-            else
-                retry_count=$((retry_count + 1))
-                if [ $retry_count -lt $max_retries ]; then
-                    echo -e "${YELLOW}  API call failed, retrying in $((retry_count * 2)) seconds... (attempt $retry_count/$max_retries)${NC}"
-                    sleep $((retry_count * 2))
-                else
-                    echo -e "${RED}  Failed to fetch repositories after $max_retries attempts${NC}"
-                    return 1
-                fi
-            fi
-        done
+        if ! page_repos=$(retry gh repo list "$org" --limit $per_page --json name,sshUrl --jq '.[] | "\(.name)|\(.sshUrl)"' 2>/dev/null); then
+            echo -e "${RED}  Failed to fetch repositories${NC}"
+            return 1
+        fi
 
         if [ -z "$page_repos" ]; then
             break
@@ -93,10 +96,6 @@ fetch_repos_paginated() {
         fi
 
         page=$((page + 1))
-
-        # Rate limiting: sleep between API calls
-        echo -e "${YELLOW}  Sleeping 2 seconds to respect rate limits...${NC}"
-        sleep 2
     done
 
     echo "$all_repos"
@@ -125,15 +124,12 @@ while IFS='|' read -r repo_name ssh_url; do
         # Repository doesn't exist locally - clone it
         echo -e "  🆕 ${YELLOW}Cloning...${NC}"
         
-        if git clone "$ssh_url" "$repo_name"; then
+        if retry git clone "$ssh_url" "$repo_name"; then
             echo -e "${GREEN}  ✓ Cloned${NC}"
         else
             echo -e "${RED}  ✗ Failed to clone ${repo_name}${NC}"
         fi
     fi
-
-    # Brief pause between repositories to be gentle on the system
-    sleep 0.5
 
     echo
 done <<< "$REPOS"
