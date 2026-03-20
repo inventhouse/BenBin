@@ -8,6 +8,33 @@ if [ -n "$DRY_RUN" ]; then
     echo "DRY RUN"
 fi
 
+export GIT_SSH_COMMAND="ssh -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3"
+
+retry() {
+  local delay=5
+  for attempt in 1 2 3 4 5; do
+    if timeout 60 "$@"; then
+      return 0
+    fi
+    echo "  Command failed (attempt $attempt), retrying in ${delay}s..."
+    sleep $delay
+    delay=$((delay * 2))
+  done
+  echo "  ERROR: command failed after 5 attempts, skipping"
+  return 1
+}
+
+check_api_rate_limit() {
+  local remaining reset
+  remaining=$(gh api rate_limit --jq '.resources.core.remaining')
+  reset=$(gh api rate_limit --jq '.resources.core.reset')
+  if [ "$remaining" -lt 10 ]; then
+    local wait=$((reset - $(date +%s) + 5))
+    echo "  API rate limit low ($remaining remaining), sleeping ${wait}s until reset..."
+    sleep $wait
+  fi
+}
+
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
 usage: gh_unmaster
@@ -21,6 +48,14 @@ USAGE
 fi
 
 GITHUB_USER=$(gh api user --jq .login)
+
+DONE_FILE="${DONE_FILE:-${TMPDIR}/$(basename $0).done}"
+if [ -f "$DONE_FILE" ]; then
+  echo "Resuming with $DONE_FILE"
+else
+  echo "Creating $DONE_FILE to track progress"
+  touch "$DONE_FILE"
+fi
 
 for REPO_PATH in */; do
   REPO_NAME=$(basename "$REPO_PATH")
@@ -37,20 +72,27 @@ for REPO_PATH in */; do
     continue
   fi
 
+  # Check if already done
+  if grep -qxF "$REPO_PATH" "$DONE_FILE"; then
+    echo "Skipping $REPO_NAME: already done"
+    continue
+  fi
+
   echo "Renaming master to main in $REPO_NAME..."
 
   # Rename the local branch
   $DRY_RUN git -C "$REPO_PATH" branch -m master main
 
   # Push the new main branch and set upstream
-  $DRY_RUN git -C "$REPO_PATH" push origin main
+  $DRY_RUN retry git -C "$REPO_PATH" push origin main
 
   # Update the default branch on GitHub
+  check_api_rate_limit
   $DRY_RUN gh repo edit "$GITHUB_USER/$REPO_NAME" --default-branch main
 
   # Delete the old master branch on the remote
-  $DRY_RUN git -C "$REPO_PATH" push origin --delete master
+  $DRY_RUN retry git -C "$REPO_PATH" push origin --delete master
 
+  echo "$REPO_PATH" >> "$DONE_FILE"
   echo "Done: $REPO_NAME"
-  sleep 2
 done
