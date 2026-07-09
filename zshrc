@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 ###  Environment Variables  ###
-export PATH="$HOME/.pyenv/bin:${PATH}:$HOME/inventhub/allgit:$HOME/inventhub/bettergit:$HOME/inventhub/BenBin:$HOME/.local/bin"
+export PATH="$HOME/.local/bin:${PATH}:$HOME/inventhub/allgit:$HOME/inventhub/bettergit:$HOME/inventhub/BenBin"
 
 # Go lang
 export PATH="$PATH:$HOME/go/bin"
@@ -9,13 +9,9 @@ export PATH="$PATH:$HOME/go/bin"
 # Rust
 export PATH="$PATH:$HOME/.cargo/bin"
 
-# pyenv setup
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
-
 # Homebrew
 if `which brew 2>&1 >> /dev/null`; then
-    eval "$(/usr/local/bin/brew shellenv)"
+    eval "$(brew shellenv)"
 fi
 #####
 
