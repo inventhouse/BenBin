@@ -26,8 +26,9 @@ retry() {
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: gh_unmaster
-       Migrates git repos in the current directory from `master` to `main`
+usage: gh_getmain
+       After repos have been migrated from `master` to `main`, this script
+       re-points other clones/workareas to the `main` branch.
 
        WARNING: This script has NOT been substantially hardened!
 

@@ -23,8 +23,7 @@ retry() {
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
 usage: sync_gh_repos [-h|--help] <organization_name>
-    Sync GitHub repositories for a given organization; requires GitHub CLI (gh).
-    Clones repositories that don't exist locally and pulls updates for those that do.
+    Clone GitHub repositories for a given organization; requires GitHub CLI (gh).
 
         -h, --help    Print this message and exit
 USAGE
