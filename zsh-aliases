@@ -5,11 +5,13 @@ if which allgit.py 2>&1 >> /dev/null; then  # Use the dev version if available
     alias ag='allgit.py'
 fi
 
+alias uvr='uv run'
 alias venv='python3 -m venv'
 alias dkc='docker-compose'
 alias tf='terraform'
 
 alias serve='python -m http.server -b 127.0.0.1'
+alias tabcount='tabgrab | cloc - --stdin-name=tabs.md'
 #####
 
 
@@ -40,6 +42,7 @@ alias pbupper='pbpaste | tr 'a-z' 'A-Z' | pbcopy'
 
 alias pbsort='pbpaste | sort | pbcopy'
 alias pbwrap='pbpaste | fmt -72 | pbcopy'
+alias pbunwrap="pbpaste | awk -v RS='' -v ORS='\n\n' '{gsub(/\n/, \" \"); print}' | pbcopy"
 
 alias pbxml='pbpaste | xmllint --format - | pbcopy'
 alias pbjson='pbpaste | jq . | pbcopy'
