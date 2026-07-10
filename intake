@@ -1,0 +1,77 @@
+#!/bin/zsh
+
+# set -x  # Uncomment for debugging
+
+if [[ "$1" == (-h|--help) ]]; then
+    cat <<USAGE
+usage: intake [-h|--help] [FILE] [MARKER] [PREFIX]
+        Prompts for a message, adds PREFIX ('- [ ]') to it, and inserts it
+        into FILE immediately after the MARKER ('## Inbox') line.  If no 
+        prefix is desired, it must be specified explicitly as "".
+
+        Primarily intended for convenient aliases like:
+            alias todo="intake ~/todo.md"
+            alias note='intake ~/notes.md "## Quick Notes" "-"'
+
+        -h, --help    Print this message and exit
+USAGE
+    exit 0
+fi
+
+IntakeFile="${1:a}"
+Marker="${2:-## Inbox}"
+Prefix="${3-- [ ]}"
+
+Bold=`tput bold`
+Off=`tput sgr0`
+
+if [[ -z "$1" ]]; then
+    vared -p "Enter path to markdown file: " IntakeFile
+    IntakeFile="${IntakeFile:a}"
+fi
+
+if [[ ! -f "$IntakeFile" ]]; then
+    print -u2 "${Bold}Error:${Off} '$IntakeFile' not found"
+    exit 1
+fi
+
+local -a lines
+lines=("${(@f)$(cat "$IntakeFile")}")
+
+local index=${lines[(r)$Marker]}
+index=${lines[(i)$Marker]}
+
+if (( index > ${#lines} )); then
+    print -u2 "${Bold}Error:${Off} '$IntakeFile' missing the exact '$Marker' line."
+    exit 1
+fi
+
+local Message=""
+local prompt_label="${Marker##[^[:alnum:]]##}"
+vared -p "${prompt_label} item: " Message
+
+if [[ -z "${Message}" ]]; then
+    print "${Bold}Canceled:${Off} Empty message."
+    exit 0
+fi
+
+# 5. Format the item
+local formatted_item
+if [[ -z "$Prefix" ]]; then
+    formatted_item="$Message"
+else
+    formatted_item="${Prefix} ${Message}"
+    [[ "$Prefix" =~ " $" ]] && formatted_item="${Prefix}${Message}"
+fi
+
+# 6. Find the exact numerical index and safely splice it into the array
+# (i) returns the 1-indexed number of the line
+local index=${lines[(i)$Marker]}
+
+# Insert the new item right after that index
+lines[$index]=("${lines[$index]}" "$formatted_item")
+
+# 7. Save changes
+print -l "${lines[@]}" > "$IntakeFile"
+
+print "${Bold}✓ Inserted${Off} under '$Marker' in ${IntakeFile:t}."
