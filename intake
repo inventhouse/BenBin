@@ -10,7 +10,6 @@ usage: intake [-h|--help] [FILE] [MARKER] [PREFIX] [MESSAGE]
         prefix is desired, it must be specified explicitly as "".
 
         If MESSAGE is given, it is used instead of prompting interactively
-        (handy for scripting/testing).
 
         Primarily intended for convenient aliases like:
             alias todo="intake ~/todo.md"
