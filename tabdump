@@ -6,6 +6,16 @@
 set -eo pipefail
 # set -x  # Uncomment for debugging
 
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    cat <<USAGE
+usage: tabdump
+       Uses `tabgrab` to dump all tabs in the default browser to a dated file and, if present, updates a "latest" hard-link to the new linkdump.
+
+       -h, --help    Print this message and exit
+USAGE
+    exit 0
+fi
+
 Bold=`tput bold`
 Off=`tput sgr0`
 
