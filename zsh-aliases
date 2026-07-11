@@ -13,7 +13,7 @@ alias tf='terraform'
 alias serve='python -m http.server -b 127.0.0.1'
 
 # Requires `brew install cloc`
-alias tabcount='tabgrab | cloc - --stdin-name=tabs.md
+alias tabcount='tabgrab | cloc - --stdin-name=tabs.md'
 alias tabless='tabgrab | less'
 
 if [ -f "$NOTES_FILE" ]; then
