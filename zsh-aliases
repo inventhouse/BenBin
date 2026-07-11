@@ -12,7 +12,7 @@ alias tf='terraform'
 
 alias serve='python -m http.server -b 127.0.0.1'
 
-# Requires `brew install cloc`
+# Requires BenBin/tabgrab and `brew install cloc`
 # HACK: "sed '$d'" drops the last line so the blank count matches the number of windows
 alias tabcount='tabgrab | sed '$d' | cloc - --stdin-name=tabs.md | grep "Markdown" | cut -wf 3,5'
 alias tabhunt='tabgrab | less'
@@ -50,6 +50,8 @@ alias pbunwrap="pbpaste | awk -v RS='' -v ORS='\n\n' '{gsub(/\n/, \" \"); print}
 
 alias pbxml='pbpaste | xmllint --format - | pbcopy'
 alias pbjson='pbpaste | jq . | pbcopy'
+
+# Requires `brew install sqlfluff`
 pbsql() {
     # Fix what can be fixed easily...
     pbpaste | sqlfluff fix --dialect postgres - | pbcopy
