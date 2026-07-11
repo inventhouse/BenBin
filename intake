@@ -28,7 +28,7 @@ Bold=`tput bold`
 Off=`tput sgr0`
 
 if [[ -z "$1" ]]; then
-    vared -p "Enter path to markdown file: " IntakeFile
+    vared -p "Enter path to intake file: " IntakeFile
     IntakeFile="${IntakeFile:a}"
 fi
 
