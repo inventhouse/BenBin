@@ -4,10 +4,13 @@
 
 if [[ "$1" == (-h|--help) ]]; then
     cat <<USAGE
-usage: intake [-h|--help] [FILE] [MARKER] [PREFIX]
+usage: intake [-h|--help] [FILE] [MARKER] [PREFIX] [MESSAGE]
         Prompts for a message, adds PREFIX ('- [ ]') to it, and inserts it
-        into FILE immediately after the MARKER ('## Inbox') line.  If no 
+        into FILE immediately after the MARKER ('## Inbox') line.  If no
         prefix is desired, it must be specified explicitly as "".
+
+        If MESSAGE is given, it is used instead of prompting interactively
+        (handy for scripting/testing).
 
         Primarily intended for convenient aliases like:
             alias todo="intake ~/todo.md"
@@ -35,28 +38,34 @@ if [[ ! -f "$IntakeFile" ]]; then
     exit 1
 fi
 
-local -a lines
 lines=("${(@f)$(cat "$IntakeFile")}")
 
-local index=${lines[(r)$Marker]}
-index=${lines[(i)$Marker]}
+# (b) escapes glob-special chars in Marker so (i) matches it literally
+MarkerPat="${(b)Marker}"
+index=${lines[(i)$MarkerPat]}
 
 if (( index > ${#lines} )); then
     print -u2 "${Bold}Error:${Off} '$IntakeFile' missing the exact '$Marker' line."
     exit 1
 fi
 
-local Message=""
-local prompt_label="${Marker##[^[:alnum:]]##}"
-vared -p "${prompt_label} item: " Message
+CleanMarker="$Marker"
+setopt extendedglob
+CleanMarker="${CleanMarker##[^[:alnum:]]##}"
+CleanMarker="${CleanMarker%%[^[:alnum:]]##}"
+unsetopt extendedglob
+
+Message="$4"
+if (( $# < 4 )); then
+    vared -p "${CleanMarker} item: " Message
+fi
 
 if [[ -z "${Message}" ]]; then
     print "${Bold}Canceled:${Off} Empty message."
     exit 0
 fi
 
-# 5. Format the item
-local formatted_item
+# Format the item
 if [[ -z "$Prefix" ]]; then
     formatted_item="$Message"
 else
@@ -64,14 +73,10 @@ else
     [[ "$Prefix" =~ " $" ]] && formatted_item="${Prefix}${Message}"
 fi
 
-# 6. Find the exact numerical index and safely splice it into the array
-# (i) returns the 1-indexed number of the line
-local index=${lines[(i)$Marker]}
-
 # Insert the new item right after that index
 lines[$index]=("${lines[$index]}" "$formatted_item")
 
-# 7. Save changes
-print -l "${lines[@]}" > "$IntakeFile"
+# Save changes; "--" keeps lines starting with "-" from being read as print options
+print -l -- "${lines[@]}" > "$IntakeFile"
 
-print "${Bold}✓ Inserted${Off} under '$Marker' in ${IntakeFile:t}."
+print "${Bold}✓ Inserted${Off} under '$CleanMarker' in ${IntakeFile:t}."
