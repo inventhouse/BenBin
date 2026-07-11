@@ -13,7 +13,8 @@ alias tf='terraform'
 alias serve='python -m http.server -b 127.0.0.1'
 
 # Requires `brew install cloc`
-alias tabcount='tabgrab | cloc - --stdin-name=tabs.md'
+alias tabcount='tabgrab | cloc - --stdin-name=tabs.md
+alias tabless='tabgrab | less'
 
 if [ -f "$NOTES_FILE" ]; then
     alias topnote='intake "$NOTES_FILE" "# --- Top ---" "-"'
@@ -45,6 +46,8 @@ alias pbc='pbpaste | sed -e "s/ # .*//" -e "s/^#.*//" -e "/^ *$/d" | pbcopy'  # 
 
 alias pbless='pbpaste | less'
 alias pbwc='pbpaste | wc'
+
+alias pbtabs='tabgrab -n 1 | pbcopy'
 
 # Convert e.g. module/sub/file.py to module.sub.file
 alias pbdotpath='pbpaste | sed -e "s/\\.[^.]*$//" | tr "/" "." | pbcopy'
