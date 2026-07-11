@@ -16,4 +16,10 @@ export PATH="$PATH:$INVENTHUB/allgit:$INVENTHUB/bettergit:$INVENTHUB/BenBin"
 if `which brew 2>&1 >> /dev/null`; then
     eval "$(brew shellenv)"
 fi
+
+export PENSIEVE_DIR="$INVENTHUB/bjh-pensieve"
+export TABDUMP_DIR="$PENSIEVE_DIR/Notes/Tabdumps"
+export NOTES_FILE="$PENSIEVE_DIR/Notes/000Notes.md"
+# export TODO_FILE="$PENSIEVE_DIR/Notes/000ToDo.md"
+# export BLUETAPE_FILE="$PENSIEVE_DIR/Notes/BlueTape.md"
 #####
