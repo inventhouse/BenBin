@@ -1,0 +1,7 @@
+#!/bin/zsh
+
+###  Pasteboard Aliases  ###
+# Termux: replace pbcopy and pbpaste
+alias pbcopy='termux-clipboard-set'
+alias pbpaste='termux-clipboard-get'
+#####

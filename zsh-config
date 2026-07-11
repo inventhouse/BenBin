@@ -1,0 +1,11 @@
+#!/bin/zsh
+
+###  Key Bindings  ###
+bindkey "^[[A" history-beginning-search-backward
+bindkey "^[[B" history-beginning-search-forward
+#####
+
+
+###  Prompt  ###
+source "$ZSH_FILES/zsh-prompt"
+#####

@@ -1,0 +1,11 @@
+#!/bin/zsh
+###  Pasteboard Aliases  ###
+# Linux: replace pbcopy and pbpaste
+# Requires `sudo apt install wl-clipboard`
+if ! which "wl-copy" 2>&1 >> /dev/null; then
+    echo "Error: wl-copy missing, install with 'sudo apt install wl-clipboard'" >&2
+fi
+
+alias pbcopy='wl-copy'
+alias pbpaste='wl-paste'
+#####

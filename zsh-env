@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+###  Environment Variables  ###
+export PATH="$HOME/.local/bin:${PATH}"
+
+# Go lang
+export PATH="$PATH:$HOME/go/bin"
+
+# Rust
+export PATH="$PATH:$HOME/.cargo/bin"
+
+# Inventhouse Tools
+export PATH="$PATH:$INVENTHUB/allgit:$INVENTHUB/bettergit:$INVENTHUB/BenBin"
+
+# Homebrew
+if `which brew 2>&1 >> /dev/null`; then
+    eval "$(brew shellenv)"
+fi
+#####
