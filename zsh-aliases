@@ -14,6 +14,7 @@ alias serve='python -m http.server -b 127.0.0.1'
 
 # Requires BenBin/tabgrab and `brew install cloc`
 # HACK: "sed '$d'" drops the last line so the blank count matches the number of windows
+# REM: perhaps tabgrab should natively support a count mode
 alias tabcount='tabgrab | sed '$d' | cloc - --stdin-name=tabs.md | grep "Markdown" | cut -wf 3,5'
 alias tabhunt='tabgrab | less'
 
