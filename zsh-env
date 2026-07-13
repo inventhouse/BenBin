@@ -17,6 +17,8 @@ if `which brew 2>&1 >> /dev/null`; then
     eval "$(brew shellenv)"
 fi
 
+export GIT_SSH_COMMAND="ssh -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2"
+
 export PENSIEVE_DIR="$INVENTHUB/bjh-pensieve"
 export TABDUMP_DIR="$PENSIEVE_DIR/Notes/Tabdumps"
 export NOTES_FILE="$PENSIEVE_DIR/Notes/000Notes.md"
