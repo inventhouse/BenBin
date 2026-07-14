@@ -17,6 +17,11 @@ if `which brew 2>&1 >> /dev/null`; then
     eval "$(brew shellenv)"
 fi
 
+# Use helix editor if available
+if which "hx" 2>&1 >> /dev/null; then
+    export EDITOR="hx"
+fi
+
 export GIT_SSH_COMMAND="ssh -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2"
 
 export PENSIEVE_DIR="$INVENTHUB/bjh-pensieve"
