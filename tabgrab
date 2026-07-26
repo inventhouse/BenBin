@@ -1,19 +1,17 @@
 #!/bin/bash
-# Copyright (c) 2022-2025 Benjamin Holt -- MIT License
+# Copyright (c) 2022-2026 Benjamin Holt -- MIT License
 
 set -eo pipefail
 # set -x  # Uncomment for debugging
 
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
-usage: tabgrab [-h|--help] [-c|--copy] [BROWSER]
+usage: tabgrab [-h|--help] [-n|--num-windows N] [BROWSER]
        Collect tabs from all windows as a markdown list of links with
        the first tab of each window as the parent of the remaining tabs.
        The current tab is marked with ☆ and minimized windows with ▽.
        BROWSER defaults to the BROWSER_APP environment variable, otherwise
        the default handler for 'https' is used to guess the system browser.
-
-       -c, --copy    Copies the list to the pasteboard
 
        -n, --num-windows N
                      Collects tabs from the first N windows, defaults to
@@ -24,20 +22,10 @@ USAGE
     exit 0
 fi
 
-CopyList="false"
 NumWindows="count (every window)"
-for arg in $@; do
-    case "$arg" in
-        -c|--copy)
-            CopyList="true"
-            shift
-            ;;
-        -n|--num-windows)
-            NumWindows="$2"
-            shift 2
-            ;;
-    esac
-done
+if [ "$1" == "-n" -o "$1" == "--num-windows" ]; then
+    NumWindows="$2"
+fi
 
 # AppleScript Localizations
 Minimized="miniaturized"
@@ -61,8 +49,6 @@ if [ -z "$Browser" ]; then
     Off=`tput sgr0`
     echo "${Bold}Grabbing tabs from ${Browser}${Off}" >&2
 fi
-
-# Hacked from [Capture all tabs in Safari as URLs to the clipboard – theconsultant.net](https://theconsultant.net/2017/06/capture-all-tabs-in-safari-as-urls-to-the-clipboard/)
 
 osascript <<SCRIPT
 tell application "$Browser"
@@ -97,11 +83,6 @@ tell application "$Browser"
         end repeat
         set tabList to tabList & linefeed
     end repeat
-    if $CopyList then
-        set the clipboard to the tabList
-        return "Copied"
-    else
-        return tabList
-    end if
+    return tabList
 end tell
 SCRIPT
