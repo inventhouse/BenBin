@@ -23,6 +23,8 @@ if which "hx" 2>&1 >> /dev/null; then
 fi
 
 export GIT_SSH_COMMAND="ssh -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2"
+# export GIT_TRACE=1
+# export GIT_TRACE_PERFORMANCE=1
 
 export PENSIEVE_DIR="$INVENTHUB/bjh-pensieve"
 export TABDUMP_DIR="$PENSIEVE_DIR/Notes/Tabdumps"
