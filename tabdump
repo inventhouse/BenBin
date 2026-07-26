@@ -1,5 +1,5 @@
-#!/bin/sh
-# Copyright (c) 2024 Benjamin Holt -- MIT License
+#!/bin/bash
+# Copyright (c) 2024-2026 Benjamin Holt -- MIT License
 
 # Somewhat hacky script to automate saving tabgrab dumps to dated files and maintaining the "latest" link
 
@@ -9,9 +9,19 @@ set -eo pipefail
 if [ "$1" == "-h" -o "$1" == "--help" ]; then
     cat <<USAGE
 usage: tabdump
-       Uses `tabgrab` to dump all tabs in the default browser to a dated file and, if present, updates a "latest" hard-link to the new linkdump.
+    Uses 'tabgrab' to dump all tabs in the default browser to a dated file
+    and, if present, updates a "latest" hard-link to the new linkdump.
 
-       -h, --help    Print this message and exit
+        -h, --help      Print this message and exit
+
+    Environment:
+        TABDUMP_DIR     Directory to write tabdump files (default: /tmp/)
+        TABDUMP_SLUG    Constant portion of the name of a tabdump file
+                        (default TabDump)
+        TABDUMP_LATEST  Name of an alias to the most recent tabdump file; if
+                        present in the TABDUMP_DIR it will be overwritten
+                        with a hard-link to the new tabdump; this allows for
+                        a stable link or bookmark (default: latest.md)
 USAGE
     exit 0
 fi
@@ -38,3 +48,4 @@ if [ -e "${LatestFile}" ]; then
     ln -f "$TabDumpFile" "${LatestFile}"
     echo "${Bold}Updated ${LatestFile}${Off}" >&2
 fi
+
