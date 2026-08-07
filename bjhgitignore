@@ -8,3 +8,4 @@ NOCOMMIT
 # ClaudeCode
 CLAUDE.md
 **/.claude/settings.local.json
+.pipeline
