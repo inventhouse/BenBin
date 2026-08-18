@@ -25,6 +25,7 @@ fi
 NumWindows="count (every window)"
 if [ "$1" == "-n" -o "$1" == "--num-windows" ]; then
     NumWindows="$2"
+    shift 2
 fi
 
 # AppleScript Localizations
