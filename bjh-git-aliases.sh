@@ -20,3 +20,4 @@ git config --global alias.nb 'newb'
 git config --global alias.gb 'getb'
 git config --global alias.lsb 'listb'
 git config --global alias.lb 'logb'
+git config --global alias.graph "log --color --graph --pretty=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %s %C(bold yellow)%d%C(reset)%n''          %C(dim black)- %an%C(reset)' --abbrev-commit --all"
