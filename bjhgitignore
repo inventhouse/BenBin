@@ -9,3 +9,6 @@ NOCOMMIT
 CLAUDE.md
 **/.claude/settings.local.json
 .pipeline
+
+# macOS
+.DS_Store
