@@ -44,6 +44,7 @@ alias pbdotpath='pbpaste | sed -e "s/\\.[^.]*$//" | tr "/" "." | pbcopy'
 
 alias pblower='pbpaste | tr 'A-Z' 'a-z' | pbcopy'
 alias pbupper='pbpaste | tr 'a-z' 'A-Z' | pbcopy'
+alias pbtitle='pbpaste | titlecase | pbcopy'
 
 alias pbsort='pbpaste | sort | pbcopy'
 alias pbwrap='pbpaste | fmt -72 | pbcopy'
