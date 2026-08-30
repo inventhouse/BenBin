@@ -2,28 +2,83 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2023 Benjamin Holt -- MIT License
 
-# Small http server that renders markdown files automatically
+# Small http server that renders markdown files automatically, with syntax
+# highlighting (highlight.js) and mermaid diagram rendering (mermaid.js)
 
 import argparse
+import html
 import http.server
+import re
+import socket
 
 import mistletoe  # install with `pip3 install mistletoe`
+
+_HLJS = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
+_HLCSS = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css"
+_MERMAID = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"
+
+def _cdn_available(timeout=2):
+    try:
+        with socket.create_connection(("cdnjs.cloudflare.com", 443), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+def _page(title, body, cdn=True):
+    head = f"""  <link rel="stylesheet" href="{_HLCSS}">
+  <script src="{_HLJS}"></script>
+  <script src="{_MERMAID}"></script>
+  <script>
+    mermaid.initialize({{startOnLoad: true}});
+    document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());
+  </script>""" if cdn else ""
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{html.escape(title)}</title>
+{head}
+</head>
+<body>
+{body}
+</body>
+</html>"""
+
+# mistletoe renders ```mermaid as <pre><code class="language-mermaid">...</code></pre>
+# mermaid.js needs <pre class="mermaid"> instead
+_MERMAID_RE = re.compile(r'<pre><code class="language-mermaid">(.*?)</code></pre>', re.DOTALL)
 
 class MarkdownHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.endswith(".md"):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html; charset=utf-8")
-            self.end_headers()
-            with open(self.path[1:], "r", encoding="utf-8") as f:
-                self.wfile.write(mistletoe.markdown(f.read()).encode())
+            self._serve(self.path[1:], self._render_md)
+        elif self.path.endswith(".py"):
+            self._serve(self.path[1:], self._render_py)
         else:
             super().do_GET()
+
+    def _serve(self, path, renderer):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html; charset=utf-8")
+        self.end_headers()
+        with open(path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.wfile.write(_page(path, renderer(content), cdn=self.cdn).encode())
+
+    def _render_md(self, text):
+        body = mistletoe.markdown(text)
+        return _MERMAID_RE.sub(lambda m: f'<pre class="mermaid">{m.group(1)}</pre>', body)
+
+    def _render_py(self, text):
+        return f'<pre><code class="language-python">{html.escape(text)}</code></pre>'
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Serve markdown files as rendered HTML")
     parser.add_argument("port", type=int, nargs="?", default=8910, help="Port to listen on (default: 8910)")
     args = parser.parse_args()
+    MarkdownHandler.cdn = _cdn_available()
+    if not MarkdownHandler.cdn:
+        print("Note: CDN unreachable — serving without syntax highlighting or mermaid rendering")
     http.server.test(
         HandlerClass=MarkdownHandler,
         port=args.port,
